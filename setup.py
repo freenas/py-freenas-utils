@@ -27,7 +27,7 @@ from setuptools import setup
 
 
 setup(
-    name='fnutils',
+    name='freenas.utils',
     version='10.2',
     url='http://github.com/freenas/middleware',
     packages=['freenas.utils'],
