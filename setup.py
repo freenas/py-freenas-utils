@@ -34,10 +34,11 @@ setup(
     name='freenas.utils',
     version='10.2',
     url='http://github.com/freenas/middleware',
-    packages=['freenas.utils'],
+    packages=['freenas', 'freenas.utils'],
     license='BSD',
     description='Utility module for FreeNAS middleware',
     platforms='any',
+    namespace_packages=[str('freenas')],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
