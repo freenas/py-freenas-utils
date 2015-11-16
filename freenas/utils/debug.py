@@ -28,7 +28,7 @@
 import sys
 import gc
 import traceback
-from dispatcher.rpc import RpcService, private
+from freenas.dispatcher.rpc import RpcService, private
 
 
 sys.path.append('/usr/local/lib/dispatcher/pydev')
