@@ -26,6 +26,10 @@
 from setuptools import setup
 
 
+install_requires = [
+    'python-dateutil',
+]
+
 setup(
     name='freenas.utils',
     version='10.2',
@@ -42,4 +46,5 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
     ],
+    install_requires=install_requires,
 )
