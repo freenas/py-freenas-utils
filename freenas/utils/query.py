@@ -254,7 +254,7 @@ class QueryList(list):
                 if key.startswith('-'):
                     key = key[1:]
                     reverse=True
-                _sort.append((key, reverse))
+                result.append((key, reverse))
 
             _sort = []
             if isinstance(sort, string_types):
