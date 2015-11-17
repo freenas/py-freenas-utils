@@ -32,8 +32,8 @@ def get_version(ver=None):
         raise ValueError("VERSION could not be parsed")
 
 
-def use_freenas(sdist, keyword, value):
+def use_freenas(dist, keyword, value):
 
     assert keyword == 'use_freenas'
 
-    sdist.version = get_version()
+    dist.version = get_version()
