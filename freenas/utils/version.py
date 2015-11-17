@@ -4,12 +4,7 @@ import sys
 
 
 def get_version(ver=None):
-    # If a version.txt file exists, use that as version
     verfile = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'version.txt')
-    if os.path.exists(verfile):
-        with open(verfile, 'r') as f:
-            return f.read().strip('\n').strip('\r')
-
     if ver is None:
         ver = os.environ.get('VERSION')
     if ver:
@@ -29,6 +24,10 @@ def get_version(ver=None):
         with open(verfile, 'w') as f:
             return f.write(final)
         return final
+    elif os.path.exists(verfile):
+        # If a version.txt file exists, use that as version
+        with open(verfile, 'r') as f:
+            return f.read().strip('\n').strip('\r')
     else:
         raise ValueError("VERSION could not be parsed")
 
