@@ -36,4 +36,6 @@ def use_freenas(dist, keyword, value):
 
     assert keyword == 'use_freenas'
 
-    dist.version = get_version()
+    version = get_version()
+    dist.version = version
+    dist.metadata.version = version
