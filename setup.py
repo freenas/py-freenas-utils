@@ -24,6 +24,7 @@
 #
 #####################################################################
 from setuptools import setup
+from freenas.utils import version
 
 
 install_requires = [
@@ -32,7 +33,7 @@ install_requires = [
 
 setup(
     name='freenas.utils',
-    version='10.2',
+    version=version.get_version(),
     url='http://github.com/freenas/middleware',
     packages=['freenas', 'freenas.utils'],
     license='BSD',
@@ -48,4 +49,9 @@ setup(
         'Programming Language :: Python :: 3',
     ],
     install_requires=install_requires,
+    entry_points={
+        'distutils.setup_keywords': [
+            'use_freenas = freenas.utils.version:use_freenas'
+        ],
+    },
 )
