@@ -28,6 +28,7 @@
 
 import re
 import inspect
+import collections
 import dateutil.parser
 
 from six import string_types
@@ -148,7 +149,7 @@ class QueryList(list):
     def __init__(self, *args, **kwargs):
         super(QueryList, self).__init__(*args, **kwargs)
         for idx, v in enumerate(self):
-                self[idx] = wrap(v)
+            self[idx] = wrap(v)
 
     def __getitem__(self, item):
         if isinstance(item, string_types):
@@ -156,7 +157,7 @@ class QueryList(list):
                 return super(QueryList, self).__getitem__(int(item))
 
             left, right = partition(item)
-            return super(QueryList, self).__getitem__(left)[right]
+            return super(QueryList, self).__getitem__(int(left))[right]
 
         return super(QueryList, self).__getitem__(item)
 
@@ -287,9 +288,9 @@ class QueryList(list):
         return result
 
 
-class QueryDict(dict):
+class QueryDictMixin(object):
     def __init__(self, *args, **kwargs):
-        super(QueryDict, self).__init__(*args, **kwargs)
+        super(QueryDictMixin, self).__init__(*args, **kwargs)
         for k, v in list(self.items()):
             if isinstance(k, string_types):
                 k = k.replace('.', r'\.')
@@ -298,28 +299,28 @@ class QueryDict(dict):
 
     def __getitem__(self, item):
         if not isinstance(item, string_types):
-            return super(QueryDict, self).__getitem__(item)
+            return super(QueryDictMixin, self).__getitem__(item)
 
-        if super(QueryDict, self).__contains__(item):
-            return super(QueryDict, self).__getitem__(item)
+        if super(QueryDictMixin, self).__contains__(item):
+            return super(QueryDictMixin, self).__getitem__(item)
 
         left, right = partition(item)
 
         if not right:
-            return super(QueryDict, self).__getitem__(left)
+            return super(QueryDictMixin, self).__getitem__(left)
 
-        return super(QueryDict, self).__getitem__(left)[right]
+        return super(QueryDictMixin, self).__getitem__(left)[right]
 
     def __setitem__(self, key, value):
         value = wrap(value)
 
         if not isinstance(key, string_types):
-            return super(QueryDict, self).__setitem__(key, value)
+            return super(QueryDictMixin, self).__setitem__(key, value)
 
         left, right = partition(key)
 
         if not right:
-            return super(QueryDict, self).__setitem__(left, value)
+            return super(QueryDictMixin, self).__setitem__(left, value)
 
         self[left][right] = value
 
@@ -328,12 +329,12 @@ class QueryDict(dict):
 
     def __contains__(self, item):
         if not isinstance(item, string_types):
-            return super(QueryDict, self).__contains__(item)
+            return super(QueryDictMixin, self).__contains__(item)
 
         left, right = partition(item)
 
         if not right:
-            return super(QueryDict, self).__contains__(left)
+            return super(QueryDictMixin, self).__contains__(left)
 
         try:
             tmp = self[left]
@@ -349,12 +350,12 @@ class QueryDict(dict):
         value = wrap(value)
 
         if not isinstance(key, string_types):
-            return super(QueryDict, self).__setitem__(key, value)
+            return super(QueryDictMixin, self).__setitem__(key, value)
 
         left, right = partition(key)
 
         if not right:
-            return super(QueryDict, self).__setitem__(left, value)
+            return super(QueryDictMixin, self).__setitem__(left, value)
 
         if left not in self:
             ll, _ = partition(right)
@@ -364,3 +365,11 @@ class QueryDict(dict):
                 self[left] = {}
 
         self[left].set(right, value)
+
+
+class QueryDict(QueryDictMixin, dict):
+    pass
+
+
+class OrderedQueryDict(QueryDictMixin, collections.OrderedDict):
+    pass
