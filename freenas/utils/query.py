@@ -366,6 +366,9 @@ class QueryDictMixin(object):
 
         self[left].set(right, value)
 
+    def query(self, *rules, **params):
+        return wrap(list(self.values())).query(*rules, **params)
+
 
 class QueryDict(QueryDictMixin, dict):
     pass
