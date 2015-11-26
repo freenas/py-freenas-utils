@@ -25,7 +25,7 @@
 #
 #####################################################################
 
-
+import copy
 import re
 import inspect
 import collections
@@ -296,6 +296,17 @@ class QueryDictMixin(object):
                 k = k.replace('.', r'\.')
 
             self[k] = wrap(v)
+
+    def __deepcopy__(self, memo):
+        result = self.__class__.__new__(self.__class__)
+        memo[id(self)] = result
+        for k, v in list(self.items()):
+            if isinstance(k, string_types):
+                k = k.replace('.', r'\.')
+
+            result[k] = copy.deepcopy(v, memo)
+
+        return result
 
     def __getitem__(self, item):
         if not isinstance(item, string_types):
