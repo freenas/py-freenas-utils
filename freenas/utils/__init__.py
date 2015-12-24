@@ -68,6 +68,16 @@ def force_none(v):
     return v
 
 
+def deep_update(source, overrides):
+    for key, value in overrides.items():
+        if isinstance(value, dict) and value:
+            returned = deep_update(source.get(key, {}), value)
+            source[key] = returned
+        else:
+            source[key] = overrides[key]
+    return source
+
+
 def materialized_paths_to_tree(lst, separator='.'):
     result = {'children': {}, 'path': []}
 
