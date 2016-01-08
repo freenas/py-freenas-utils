@@ -41,7 +41,7 @@ operators_table = {
     '<': lambda x, y: x < y,
     '>=': lambda x, y: x >= y,
     '<=': lambda x, y: x <= y,
-    '~': lambda x, y: re.search(y, x),
+    '~': lambda x, y: re.search(str(y), str(x)),
     'in': lambda x, y: x in y,
     'nin': lambda x, y: x not in y
 }
@@ -87,7 +87,7 @@ def eval_field_operator(item, t):
     if len(t) == 4:
         right = conversions_table[t[3]](right)
 
-    return operators_table[op](item[left], right)
+    return operators_table[op](item.get(left), right)
 
 
 def eval_tuple(item, t):
