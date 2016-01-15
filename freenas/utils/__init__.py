@@ -68,6 +68,11 @@ def force_none(v):
     return v
 
 
+def chunks(arr, size):
+    for i in range(0, len(arr), size):
+        yield arr[i:i+size]
+
+
 def deep_update(source, overrides):
     for key, value in overrides.items():
         if isinstance(value, dict) and value:
