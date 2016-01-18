@@ -25,11 +25,21 @@
 #
 #####################################################################
 
-from datetime import timedelta
+import re
+import codecs
 import logging
 import logging.handlers
 import copy
+from datetime import timedelta
 
+ESCAPE_SEQUENCE_RE = re.compile(r'''
+    ( \\U........      # 8-digit hex escapes
+    | \\u....          # 4-digit hex escapes
+    | \\x..            # 2-digit hex escapes
+    | \\[0-7]{1,3}     # Octal escapes
+    | \\N\{[^}]+\}     # Unicode characters by name
+    | \\[\\'"abfnrtv]  # Single-character escapes
+    )''', re.UNICODE | re.VERBOSE)
 
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s'
 
@@ -81,6 +91,13 @@ def deep_update(source, overrides):
         else:
             source[key] = overrides[key]
     return source
+
+
+def decode_escapes(s):
+    def decode_match(match):
+        return codecs.decode(match.group(0), 'unicode-escape')
+
+    return ESCAPE_SEQUENCE_RE.sub(decode_match, s)
 
 
 def materialized_paths_to_tree(lst, separator='.'):
