@@ -79,6 +79,7 @@ class DebugService(RpcService):
         if not self.gevent:
             raise RpcException(errno.ENOTSUP, 'Not supported')
 
+        from gevent import spawn
         from gevent.backdoor import BackdoorServer
         self.backdoor_server = BackdoorServer(
             ('127.0.0.1', 9999),
@@ -86,7 +87,7 @@ class DebugService(RpcService):
             locals=self.backdoor_locals
         )
 
-        self.backdoor_server.serve_forever()
+        spawn(self.backdoor_server.serve_forever())
 
     @private
     def stop_backdoor(self):
@@ -95,3 +96,4 @@ class DebugService(RpcService):
 
         if self.backdoor_server:
             self.backdoor_server.close()
+            self.backdoor_server = None
