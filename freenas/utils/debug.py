@@ -25,18 +25,21 @@
 #
 #####################################################################
 
+import errno
 import sys
 import gc
 import traceback
-from freenas.dispatcher.rpc import RpcService, private
+from freenas.dispatcher.rpc import RpcService, RpcException, private
 
 
 sys.path.append('/usr/local/lib/dispatcher/pydev')
 
 
 class DebugService(RpcService):
-    def __init__(self, gevent=False):
+    def __init__(self, gevent=False, builtins=None):
         self.gevent = gevent
+        self.backdoor_locals = builtins or {}
+        self.backdoor_server = None
 
     @private
     def attach(self, host, port):
@@ -70,3 +73,25 @@ class DebugService(RpcService):
                 dump.append(''.join(traceback.format_stack(frame)))
 
             return dump
+
+    @private
+    def start_backdoor(self):
+        if not self.gevent:
+            raise RpcException(errno.ENOTSUP, 'Not supported')
+
+        from gevent.backdoor import BackdoorServer
+        self.backdoor_server = BackdoorServer(
+            ('127.0.0.1', 9999),
+            banner='DebugService backdoor server',
+            locals=self.backdoor_locals
+        )
+
+        self.backdoor_server.serve_forever()
+
+    @private
+    def stop_backdoor(self):
+        if not self.gevent:
+            raise RpcException(errno.ENOTSUP, 'Not supported')
+
+        if self.backdoor_server:
+            self.backdoor_server.close()
