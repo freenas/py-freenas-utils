@@ -86,11 +86,12 @@ def chunks(arr, size):
 def iter_chunked(iterable, chunksize):
     ret = []
     try:
-        ret.clear()
-        for i in range(chunksize):
-            ret.append(next(iterable))
+        while True:
+            ret.clear()
+            for i in range(chunksize):
+                ret.append(next(iterable))
 
-        yield ret
+            yield ret
     except StopIteration:
         if ret:
             yield ret
