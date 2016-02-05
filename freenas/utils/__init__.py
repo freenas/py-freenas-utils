@@ -83,6 +83,19 @@ def chunks(arr, size):
         yield arr[i:i+size]
 
 
+def iter_chunked(iterable, chunksize):
+    ret = []
+    try:
+        ret.clear()
+        for i in range(chunksize):
+            ret.append(next(iterable))
+
+        yield ret
+    except StopIteration:
+        if ret:
+            yield ret
+
+
 def deep_update(source, overrides):
     for key, value in overrides.items():
         if isinstance(value, dict) and value:
