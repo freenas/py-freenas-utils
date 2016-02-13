@@ -25,12 +25,15 @@
 #
 #####################################################################
 
+import os
 import re
 import codecs
 import logging
 import logging.handlers
 import copy
 from datetime import timedelta
+from string import Template
+
 
 ESCAPE_SEQUENCE_RE = re.compile(r'''
     ( \\U........      # 8-digit hex escapes
@@ -98,6 +101,14 @@ def decode_escapes(s):
         return codecs.decode(match.group(0), 'unicode-escape')
 
     return ESCAPE_SEQUENCE_RE.sub(decode_match, s)
+
+
+def process_template(input, output, **kwargs):
+    with open(input, 'r') as f:
+        t = Template(f.read())
+
+        with open(output, 'w') as dest:
+            dest.write(t.substitute(**kwargs))
 
 
 def materialized_paths_to_tree(lst, separator='.'):
