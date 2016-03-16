@@ -188,7 +188,7 @@ def xrecvmsg(sock, length, anclength=None):
             continue
 
         if buf == b'':
-            return buf, []
+            return buf, ancdata
 
         done += len(buf)
         message += buf
