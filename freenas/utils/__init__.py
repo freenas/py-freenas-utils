@@ -188,14 +188,13 @@ def xrecvmsg(sock, length, anclength=None):
             continue
 
         if buf == b'':
-            return buf, ancdata
+            return message, ancdata
 
         done += len(buf)
         message += buf
         ancdata += anc
 
     return message, ancdata
-
 
 
 class FaultTolerantLogHandler(logging.handlers.WatchedFileHandler):
