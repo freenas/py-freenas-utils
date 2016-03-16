@@ -165,6 +165,45 @@ def configure_logging(path, level):
         logging.root.addHandler(handler)
 
 
+def xsendmsg(sock, buffer, ancdata=None):
+    done = 0
+    while done < len(buffer):
+        try:
+            done += sock.sendmsg([buffer[done:]], ancdata or [])
+        except InterruptedError:
+            continue
+
+        ancdata = None
+
+    print('sent {0}'.format(buffer))
+
+
+def xrecvmsg(sock, length, anclength=None):
+    done = 0
+    idx = 0
+    message = b''
+    ancdata = []
+
+    while done < length:
+        try:
+            buf, anc, _, _ = sock.recvmsg(length - done, anclength or 0)
+        except InterruptedError:
+            continue
+
+        print('read{2} {0}, {1}'.format(buf, anc, idx))
+        idx += 1
+        if buf == b'':
+            return buf, []
+
+        done += len(buf)
+        message += buf
+        ancdata += anc
+
+    print('returning with {0}, length was {1}'.format(message, length))
+    return message, ancdata
+
+
+
 class FaultTolerantLogHandler(logging.handlers.WatchedFileHandler):
     def emit(self, record):
         try:
