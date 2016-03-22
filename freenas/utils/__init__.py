@@ -165,6 +165,23 @@ def configure_logging(path, level):
         logging.root.addHandler(handler)
 
 
+def load_module_from_file(name, path):
+    import importlib.machinery
+
+    _, ext = os.path.splitext(path)
+
+    if ext == '.py':
+        loader = importlib.machinery.SourceFileLoader(name, path)
+    elif ext == '.pyc':
+        loader = importlib.machinery.SourcelessFileLoader(name, path)
+    elif ext == '.so':
+        loader = importlib.machinery.ExtensionFileLoader(name, path)
+    else:
+        raise ValueError('Invalid module file extension')
+
+    return loader.load_module()
+
+
 def xsendmsg(sock, buffer, ancdata=None):
     done = 0
     while done < len(buffer):
