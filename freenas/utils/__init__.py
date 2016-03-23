@@ -172,6 +172,10 @@ def load_module_from_file(name, path):
 
     if ext == '.py':
         loader = importlib.machinery.SourceFileLoader(name, path)
+        pyc_path = os.path.dirname(path) + '{0}.cpython-34.pyc'.format(os.path.basename(path).split('.', 1)[0])
+        if os.path.isfile(pyc_path):
+            if os.path.getmtime(pyc_path) > os.path.getmtime(path):
+                loader = importlib.machinery.SourcelessFileLoader(name, path)
     elif ext == '.pyc':
         loader = importlib.machinery.SourcelessFileLoader(name, path)
     elif ext == '.so':
