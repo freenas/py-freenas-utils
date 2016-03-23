@@ -179,7 +179,7 @@ def load_module_from_file(name, path):
         )
         if os.path.isfile(pyc_path):
             if os.path.getmtime(pyc_path) > os.path.getmtime(path):
-                loader = importlib.machinery.SourcelessFileLoader(name, path)
+                loader = importlib.machinery.SourcelessFileLoader(name, pyc_path)
     elif ext == '.pyc':
         loader = importlib.machinery.SourcelessFileLoader(name, path)
     elif ext == '.so':
