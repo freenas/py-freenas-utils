@@ -94,10 +94,10 @@ def iter_chunked(iterable, chunksize):
             for i in range(chunksize):
                 ret.append(next(iterable))
 
-            yield ret
+            yield ret.copy()
     except StopIteration:
         if ret:
-            yield ret
+            yield ret.copy()
 
 
 def deep_update(source, overrides):
