@@ -25,12 +25,15 @@
 #
 #####################################################################
 
+import os
 import re
 import codecs
 import logging
 import logging.handlers
 import copy
 from datetime import timedelta
+from string import Template
+
 
 ESCAPE_SEQUENCE_RE = re.compile(r'''
     ( \\U........      # 8-digit hex escapes
@@ -114,6 +117,14 @@ def decode_escapes(s):
     return ESCAPE_SEQUENCE_RE.sub(decode_match, s)
 
 
+def process_template(input, output, **kwargs):
+    with open(input, 'r') as f:
+        t = Template(f.read())
+
+        with open(output, 'w') as dest:
+            dest.write(t.substitute(**kwargs))
+
+
 def materialized_paths_to_tree(lst, separator='.'):
     result = {'children': {}, 'path': []}
 
@@ -168,9 +179,97 @@ def configure_logging(path, level):
         logging.root.addHandler(handler)
 
 
+def load_module_from_file(name, path):
+    import importlib.machinery
+
+    _, ext = os.path.splitext(path)
+
+    if ext == '.py':
+        loader = importlib.machinery.SourceFileLoader(name, path)
+        pyc_path = os.path.join(
+            os.path.dirname(path),
+            '__pycache__',
+            '{0}.cpython-34.pyc'.format(os.path.basename(path).split('.', 1)[0])
+        )
+        if os.path.isfile(pyc_path):
+            if os.path.getmtime(pyc_path) > os.path.getmtime(path):
+                loader = importlib.machinery.SourcelessFileLoader(name, pyc_path)
+    elif ext == '.pyc':
+        loader = importlib.machinery.SourcelessFileLoader(name, path)
+    elif ext == '.so':
+        loader = importlib.machinery.ExtensionFileLoader(name, path)
+    else:
+        raise ValueError('Invalid module file extension')
+
+    return loader.load_module()
+
+
+def xsendmsg(sock, buffer, ancdata=None):
+    done = 0
+    while done < len(buffer):
+        try:
+            done += sock.sendmsg([buffer[done:]], ancdata or [])
+        except InterruptedError:
+            continue
+
+        ancdata = None
+
+
+def xrecvmsg(sock, length, anclength=None):
+    done = 0
+    message = b''
+    ancdata = []
+
+    while done < length:
+        try:
+            buf, anc, _, _ = sock.recvmsg(length - done, anclength or 0)
+        except InterruptedError:
+            continue
+
+        if buf == b'':
+            return message, ancdata
+
+        done += len(buf)
+        message += buf
+        ancdata += anc
+
+    return message, ancdata
+
+
 class FaultTolerantLogHandler(logging.handlers.WatchedFileHandler):
     def emit(self, record):
         try:
             logging.handlers.WatchedFileHandler.emit(self, record)
         except IOError:
             pass
+
+
+class SmartEventSet(object):
+    """
+    A small class to enable context manager based event sets.
+    i.e. using event set/unset via a 'with' statement.
+
+    Usage:
+    with SmartEventSet(threading.Event()):
+        do_your_code
+
+    What this will do is that it will set the event supplied to it upon enetering the context
+    and upon exit it will clear the event.
+
+    Thus this is equivalent of doing the following:
+        evt = threading.Event()
+        evt.set()
+        your_code_snippet_here
+        evt.clear()
+    """
+
+    def __init__(self, evt):
+        self.evt = evt
+
+    def __enter__(self):
+        self.evt.set()
+        # Return event just for the purposes of the `with SmartEventSet(foo) as bar`
+        return self.evt
+
+    def __exit__(self, type, value, traceback):
+        self.evt.clear()

@@ -352,6 +352,9 @@ class QueryDictMixin(object):
         except KeyError:
             return False
 
+        if not isinstance(tmp, (QueryDict, QueryList)):
+            return False
+
         return tmp.contains_path(right)
 
     def get(self, k, d=None):
