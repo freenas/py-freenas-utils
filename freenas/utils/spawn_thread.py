@@ -25,28 +25,30 @@
 #
 #####################################################################
 
-import os
+import threading
 
 
-class ClientType(object):
-    THREADED = 1
-    GEVENT = 2
+def gevent_monkey_patched():
+    try:
+        from gevent import monkey
+    except ImportError:
+        return False
+    else:
+        return bool(monkey.saved)
 
 
-if os.getenv("DISPATCHERCLIENT_TYPE") == "GEVENT":
-    from gevent.greenlet import Greenlet
-    _thread_type = ClientType.GEVENT
+if not gevent_monkey_patched():
+    from concurrent.futures import ThreadPoolExecutor
+    _thread_pool = ThreadPoolExecutor(30)
+    _gevent = True
 else:
-    from .maskedthread import MaskedThread
-    _thread_type = ClientType.THREADED
+    _gevent = False
 
 
 def spawn_thread(*args, **kwargs):
-    if _thread_type == ClientType.THREADED:
-        thread = MaskedThread(*args, **kwargs)
-        return thread
+    if not _gevent and kwargs.get('threadpool'):
+        return _thread_pool.submit(*args, **kwargs)
 
-    if _thread_type == ClientType.GEVENT:
-        run = kwargs.pop('target')
-        args = kwargs.pop('args', [])
-        return Greenlet(run, *args)
+    t = threading.Thread(target=args[0], args=args[1:], daemon=True)
+    t.start()
+    return t
