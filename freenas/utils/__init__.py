@@ -31,6 +31,11 @@ import codecs
 import logging
 import logging.handlers
 import copy
+import crypt
+import random
+import string
+import binascii
+import hashlib
 from datetime import timedelta
 from string import Template
 
@@ -234,6 +239,16 @@ def xrecvmsg(sock, length, anclength=None):
         ancdata += anc
 
     return message, ancdata
+
+
+def crypted_password(cleartext):
+    return crypt.crypt(cleartext, '$6$' + ''.join([
+        random.choice(string.ascii_letters + string.digits) for _ in range(16)]))
+
+
+def nt_password(cleartext):
+    nthash = hashlib.new('md4', cleartext.encode('utf-16le')).digest()
+    return binascii.hexlify(nthash).decode('utf-8')
 
 
 class FaultTolerantLogHandler(logging.handlers.WatchedFileHandler):
