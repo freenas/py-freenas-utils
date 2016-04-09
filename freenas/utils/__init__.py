@@ -248,7 +248,7 @@ def crypted_password(cleartext):
 
 def nt_password(cleartext):
     nthash = hashlib.new('md4', cleartext.encode('utf-16le')).digest()
-    return binascii.hexlify(nthash).decode('utf-8')
+    return binascii.hexlify(nthash).decode('utf-8').upper()
 
 
 class FaultTolerantLogHandler(logging.handlers.WatchedFileHandler):
