@@ -81,6 +81,13 @@ def force_none(v):
     return v
 
 
+def yesno_to_bool(v):
+    if v == 'yes':
+        return True
+
+    return False
+
+
 def chunks(arr, size):
     for i in range(0, len(arr), size):
         yield arr[i:i+size]
