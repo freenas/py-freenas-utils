@@ -66,6 +66,9 @@ def best_match(items, name, key=None, default=None):
         return len(i)
 
     matches = filter(try_match, items)
+    if not matches:
+        return None
+
     return max(matches, key=get_length)
 
 
