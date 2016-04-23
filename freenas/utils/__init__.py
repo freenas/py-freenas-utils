@@ -31,6 +31,7 @@ import codecs
 import logging
 import logging.handlers
 import copy
+import fnmatch
 from datetime import timedelta
 from string import Template
 
@@ -53,6 +54,19 @@ def first_or_default(f, iterable, default=None):
         return i[0]
 
     return default
+
+
+def best_match(items, name, key=None, default=None):
+    def try_match(item):
+        pat = key(item) if key else item
+        return fnmatch.fnmatch(name, pat)
+
+    def get_length(item):
+        i = key(item) if key else i
+        return len(i)
+
+    matches = filter(try_match, items)
+    return max(matches, key=get_length)
 
 
 def exclude(d, *keys):
