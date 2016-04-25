@@ -95,6 +95,8 @@ def normalize(d, d2):
     for k, v in list(d2.items()):
         d.setdefault(k, v)
 
+    return d
+
 
 def force_none(v):
     if not v:
