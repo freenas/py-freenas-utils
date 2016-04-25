@@ -34,6 +34,7 @@ import copy
 import fnmatch
 from datetime import timedelta
 from string import Template
+from freenas.utils.trace_logger import TraceLogger
 
 
 ESCAPE_SEQUENCE_RE = re.compile(r'''
@@ -191,6 +192,7 @@ def to_timedelta(time_val):
 
 
 def configure_logging(path, level):
+    logging.setLoggerClass(TraceLogger)
     logging.basicConfig(
         level=logging.getLevelName(level),
         format=LOGGING_FORMAT,
