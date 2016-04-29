@@ -32,6 +32,7 @@ import logging
 import logging.handlers
 import copy
 import fnmatch
+import collections
 from datetime import timedelta
 from string import Template
 from freenas.utils.trace_logger import TraceLogger
@@ -90,6 +91,17 @@ def extend(d, d2):
 def normalize(d, d2):
     for k, v in list(d2.items()):
         d.setdefault(k, v)
+
+
+def deep_update(source, overrides):
+    for key, value in overrides.items():
+        if isinstance(value, collections.Mapping) and value:
+            returned = deep_update(source.get(key, {}), value)
+            source[key] = returned
+        else:
+            source[key] = overrides[key]
+
+    return source
 
 
 def force_none(v):
