@@ -253,6 +253,15 @@ def xsendmsg(sock, buffer, ancdata=None):
         ancdata = None
 
 
+def in_directory(d1, d2):
+    d1 = os.path.join(os.path.realpath(d1), '')
+    d2 = os.path.join(os.path.realpath(d1), '')
+    if d1 == d2:
+        return True
+
+    return os.path.commonprefix([d1, d2]) == d2
+
+
 def xrecvmsg(sock, length, anclength=None):
     done = 0
     message = b''
