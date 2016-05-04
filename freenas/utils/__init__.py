@@ -37,8 +37,10 @@ import string
 import binascii
 import hashlib
 import fnmatch
+import collections
 from datetime import timedelta
 from string import Template
+from freenas.utils.trace_logger import TraceLogger
 
 
 ESCAPE_SEQUENCE_RE = re.compile(r'''
@@ -96,6 +98,17 @@ def normalize(d, d2):
         d.setdefault(k, v)
 
     return d
+
+
+def deep_update(source, overrides):
+    for key, value in overrides.items():
+        if isinstance(value, collections.Mapping) and value:
+            returned = deep_update(source.get(key, {}), value)
+            source[key] = returned
+        else:
+            source[key] = overrides[key]
+
+    return source
 
 
 def force_none(v):
@@ -198,6 +211,7 @@ def to_timedelta(time_val):
 
 
 def configure_logging(path, level):
+    logging.setLoggerClass(TraceLogger)
     logging.basicConfig(
         level=logging.getLevelName(level),
         format=LOGGING_FORMAT,
@@ -244,6 +258,15 @@ def xsendmsg(sock, buffer, ancdata=None):
             continue
 
         ancdata = None
+
+
+def in_directory(d1, d2):
+    d1 = os.path.join(os.path.realpath(d1), '')
+    d2 = os.path.join(os.path.realpath(d1), '')
+    if d1 == d2:
+        return True
+
+    return os.path.commonprefix([d1, d2]) == d2
 
 
 def xrecvmsg(sock, length, anclength=None):
