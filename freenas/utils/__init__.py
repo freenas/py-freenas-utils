@@ -137,6 +137,12 @@ def iter_chunked(iterable, chunksize):
             yield ret.copy()
 
 
+def remove_unchanged(d1, d2):
+    for i in list(d1):
+        if d1[i] == d2[i]:
+            del d1[i]
+
+
 def deep_update(source, overrides):
     for key, value in overrides.items():
         if isinstance(value, dict) and value:
