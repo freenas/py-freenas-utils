@@ -33,31 +33,31 @@ def modes_to_oct(modes):
     result = 0
 
     if modes['user.read']:
-        result &= stat.S_IRUSR
+        result |= stat.S_IRUSR
 
     if modes['user.write']:
-        result &= stat.S_IWUSR
+        result |= stat.S_IWUSR
 
     if modes['user.execute']:
-        result &= stat.S_IXUSR
+        result |= stat.S_IXUSR
 
     if modes['group.read']:
-        result &= stat.S_IRGRP
+        result |= stat.S_IRGRP
 
     if modes['group.write']:
-        result &= stat.S_IWGRP
+        result |= stat.S_IWGRP
 
     if modes['group.execute']:
-        result &= stat.S_IXGRP
+        result |= stat.S_IXGRP
 
     if modes['others.read']:
-        result &= stat.S_IROTH
+        result |= stat.S_IROTH
 
     if modes['others.write']:
-        result &= stat.S_IWOTH
+        result |= stat.S_IWOTH
 
     if modes['others.execute']:
-        result &= stat.S_IXOTH
+        result |= stat.S_IXOTH
 
     return result
 
