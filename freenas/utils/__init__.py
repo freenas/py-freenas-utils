@@ -139,6 +139,9 @@ def iter_chunked(iterable, chunksize):
 
 def remove_unchanged(d1, d2):
     for i in list(d1):
+        if i not in d2:
+            continue
+
         if d1[i] == d2[i]:
             del d1[i]
 
