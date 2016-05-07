@@ -26,6 +26,7 @@
 #####################################################################
 from freenas.utils.query import wrap
 import stat
+import re
 
 
 def modes_to_oct(modes):
@@ -130,6 +131,8 @@ def int_to_string(value):
 
 
 def string_to_int(value):
+    if not re.match(r'[r-][w-][x-][r-][w-][x-][r-][w-][x-]', value):
+        raise ValueError('Invalid permissions format')
     result = 0
     value = value[::-1]
     for idx, i in enumerate(value):
