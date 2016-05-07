@@ -131,7 +131,7 @@ def int_to_string(value):
 
 
 def string_to_int(value):
-    if not re.match(r'[r-][w-][x-][r-][w-][x-][r-][w-][x-]', value):
+    if not re.match(r'^[r-][w-][x-][r-][w-][x-][r-][w-][x-]$', value):
         raise ValueError('Invalid permissions format')
     result = 0
     value = value[::-1]
