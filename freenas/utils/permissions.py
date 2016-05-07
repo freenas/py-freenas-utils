@@ -71,3 +71,69 @@ def get_type(st):
 
     else:
         return 'FILE'
+
+
+def perm_to_oct_string(perm_obj):
+    def to_oct(val):
+        return oct(val).split('o')[-1].zfill(3)
+
+    value = perm_obj.get('value')
+    if value:
+        return to_oct(value)
+    return to_oct(modes_to_oct(perm_obj))
+
+
+def get_unix_permissions(value):
+    return {
+        'value': value,
+        'user': {
+            'read': bool(value & stat.S_IRUSR),
+            'write': bool(value & stat.S_IWUSR),
+            'execute': bool(value & stat.S_IXUSR)
+        },
+        'group': {
+            'read': bool(value & stat.S_IRGRP),
+            'write': bool(value & stat.S_IWGRP),
+            'execute': bool(value & stat.S_IXGRP)
+        },
+        'others': {
+            'read': bool(value & stat.S_IROTH),
+            'write': bool(value & stat.S_IWOTH),
+            'execute': bool(value & stat.S_IXOTH)
+        },
+    }
+
+
+def get_integer(perm_obj):
+    value = perm_obj.get('value')
+    if value:
+        return int(value)
+    else:
+        return modes_to_oct(perm_obj)
+
+
+def int_to_string(value):
+    result = ''
+    for i in range(0, 9):
+        if value & (1 << i):
+            if not i % 3:
+                result += 'x'
+                continue
+            if not i % 2:
+                result += 'r'
+                continue
+            result += 'w'
+        else:
+            result += '-'
+
+    return result[::-1]
+
+
+def string_to_int(value):
+    result = 0
+    value = value[::-1]
+    for idx, i in enumerate(value):
+        if i != '-':
+            result |= 1 << idx
+
+    return result
