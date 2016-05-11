@@ -32,17 +32,18 @@ import traceback
 
 _srcfile = __file__
 
+TRACE = logging.DEBUG-5
+
 
 class TraceLogger(logging.Logger):
-    TRACE = logging.DEBUG-5
 
     def __init__(self, name):
         logging.Logger.__init__(self, name)
-        logging.addLevelName(self.TRACE, 'TRACE')
+        logging.addLevelName(TRACE, 'TRACE')
         return
 
     def trace(self, msg, *args, **kwargs):
-        self.log(self.TRACE, msg, *args, **kwargs)
+        self.log(TRACE, msg, *args, **kwargs)
 
     def findCaller(self, stack_info=False):
         """
