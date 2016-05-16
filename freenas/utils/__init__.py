@@ -64,10 +64,10 @@ def best_match(items, name, key=None, default=None):
         return fnmatch.fnmatch(name, pat)
 
     def get_length(item):
-        i = key(item) if key else i
+        i = key(item) if key else item
         return len(i)
 
-    matches = filter(try_match, items)
+    matches = list(filter(try_match, items))
     if not matches:
         return None
 
