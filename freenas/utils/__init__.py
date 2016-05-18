@@ -69,7 +69,7 @@ def best_match(items, name, key=None, default=None):
 
     matches = list(filter(try_match, items))
     if not matches:
-        return None
+        return default
 
     return max(matches, key=get_length)
 
