@@ -93,17 +93,6 @@ def normalize(d, d2):
         d.setdefault(k, v)
 
 
-def deep_update(source, overrides):
-    for key, value in overrides.items():
-        if isinstance(value, collections.Mapping) and value:
-            returned = deep_update(source.get(key, {}), value)
-            source[key] = returned
-        else:
-            source[key] = overrides[key]
-
-    return source
-
-
 def force_none(v):
     if not v:
         return None
