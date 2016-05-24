@@ -260,6 +260,10 @@ def in_directory(d1, d2):
     return os.path.commonprefix([d1, d2]) == d2
 
 
+def is_ascii(s):
+    return len(s) == len(s.encode())
+
+
 def xrecvmsg(sock, length, anclength=None):
     done = 0
     message = b''
