@@ -40,9 +40,9 @@ def gevent_monkey_patched():
 if not gevent_monkey_patched():
     from concurrent.futures import ThreadPoolExecutor
     _thread_pool = ThreadPoolExecutor(30)
-    _gevent = False
-else:
     _gevent = True
+else:
+    _gevent = False
 
 
 def spawn_thread(*args, **kwargs):
