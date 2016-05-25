@@ -40,13 +40,13 @@ def gevent_monkey_patched():
 if not gevent_monkey_patched():
     from concurrent.futures import ThreadPoolExecutor
     _thread_pool = ThreadPoolExecutor(30)
-    _gevent = True
-else:
     _gevent = False
+else:
+    _gevent = True
 
 
 def spawn_thread(*args, **kwargs):
-    if not _gevent and kwargs.get('threadpool'):
+    if not _gevent and kwargs.pop('threadpool'):
         return _thread_pool.submit(*args, **kwargs)
 
     t = threading.Thread(target=args[0], args=args[1:], daemon=True)
