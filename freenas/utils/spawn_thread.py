@@ -46,7 +46,7 @@ else:
 
 
 def spawn_thread(*args, **kwargs):
-    if not _gevent and kwargs.pop('threadpool'):
+    if not _gevent and kwargs.pop('threadpool', None):
         return _thread_pool.submit(*args, **kwargs)
 
     t = threading.Thread(target=args[0], args=args[1:], daemon=True)
