@@ -253,7 +253,7 @@ def xsendmsg(sock, buffer, ancdata=None):
 
 def in_directory(d1, d2):
     d1 = os.path.join(os.path.realpath(d1), '')
-    d2 = os.path.join(os.path.realpath(d1), '')
+    d2 = os.path.join(os.path.realpath(d2), '')
     if d1 == d2:
         return True
 
