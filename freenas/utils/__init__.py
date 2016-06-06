@@ -69,12 +69,12 @@ def best_match(items, name, key=None, default=None):
         return fnmatch.fnmatch(name, pat)
 
     def get_length(item):
-        i = key(item) if key else i
+        i = key(item) if key else item
         return len(i)
 
-    matches = filter(try_match, items)
+    matches = list(filter(try_match, items))
     if not matches:
-        return None
+        return default
 
     return max(matches, key=get_length)
 
@@ -98,17 +98,6 @@ def normalize(d, d2):
         d.setdefault(k, v)
 
     return d
-
-
-def deep_update(source, overrides):
-    for key, value in overrides.items():
-        if isinstance(value, collections.Mapping) and value:
-            returned = deep_update(source.get(key, {}), value)
-            source[key] = returned
-        else:
-            source[key] = overrides[key]
-
-    return source
 
 
 def force_none(v):
@@ -142,6 +131,15 @@ def iter_chunked(iterable, chunksize):
     except StopIteration:
         if ret:
             yield ret.copy()
+
+
+def remove_unchanged(d1, d2):
+    for i in list(d1):
+        if i not in d2:
+            continue
+
+        if d1[i] == d2[i]:
+            del d1[i]
 
 
 def deep_update(source, overrides):
@@ -262,11 +260,15 @@ def xsendmsg(sock, buffer, ancdata=None):
 
 def in_directory(d1, d2):
     d1 = os.path.join(os.path.realpath(d1), '')
-    d2 = os.path.join(os.path.realpath(d1), '')
+    d2 = os.path.join(os.path.realpath(d2), '')
     if d1 == d2:
         return True
 
     return os.path.commonprefix([d1, d2]) == d2
+
+
+def is_ascii(s):
+    return len(s) == len(s.encode())
 
 
 def xrecvmsg(sock, length, anclength=None):

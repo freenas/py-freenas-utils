@@ -1,5 +1,5 @@
 #+
-# Copyright 2015 iXsystems, Inc.
+# Copyright 2016 iXsystems, Inc.
 # All rights reserved
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,31 +24,24 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 #####################################################################
-
-import threading
-
-
-def gevent_monkey_patched():
-    try:
-        from gevent import monkey
-    except ImportError:
-        return False
-    else:
-        return bool(monkey.saved)
+import time
+from functools import wraps
 
 
-if not gevent_monkey_patched():
-    from concurrent.futures import ThreadPoolExecutor
-    _thread_pool = ThreadPoolExecutor(30)
-    _gevent = False
-else:
-    _gevent = True
+class delay(object):
+    def __init__(self, seconds=0, minutes=0, hours=0):
+        self.delay_time = seconds + 60*minutes + 60*60*hours
+        self.called = False
 
+    def __call__(self, fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            if self.called:
+                return
+            else:
+                self.called = True
+                time.sleep(self.delay_time)
+                self.called = False
+                return fn(*args, **kwargs)
 
-def spawn_thread(*args, **kwargs):
-    if not _gevent and kwargs.pop('threadpool', None):
-        return _thread_pool.submit(*args, **kwargs)
-
-    t = threading.Thread(target=args[0], args=args[1:], daemon=True)
-    t.start()
-    return t
+        return wrapper
