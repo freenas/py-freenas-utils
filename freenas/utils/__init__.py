@@ -37,7 +37,6 @@ import string
 import binascii
 import hashlib
 import fnmatch
-import collections
 from datetime import timedelta
 from string import Template
 from freenas.utils.trace_logger import TraceLogger
@@ -290,6 +289,14 @@ def xrecvmsg(sock, length, anclength=None):
         ancdata += anc
 
     return message, ancdata
+
+
+def sha256(fname, b_size=65536):
+    hash_sha256 = hashlib.sha256()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(b_size), b""):
+            hash_sha256.update(chunk)
+    return hash_sha256.hexdigest()
 
 
 def crypted_password(cleartext):
