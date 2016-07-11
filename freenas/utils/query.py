@@ -130,7 +130,7 @@ def wrap(obj):
     if hasattr(obj, '__getstate__'):
         obj = obj.__getstate__()
 
-    if inspect.isgenerator(obj):
+    if hasattr(obj, '__next__'):
         obj = list(obj)
 
     if type(obj) in (QueryDict, QueryList):
