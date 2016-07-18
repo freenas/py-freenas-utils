@@ -226,14 +226,16 @@ class QueryList(list):
         sort = params.pop('sort', None)
         postprocess = params.pop('callback', None)
         select = params.pop('select', None)
-        result = []
+        stream = params.pop('stream', False)
+        result = iter(self)
 
-        if len(rules) == 0:
-            result = list(self)
-        else:
-            for i in self:
+        def search(data):
+            for i in data:
                 if matches(i, *rules):
-                    result.append(i)
+                    yield i
+
+        if rules:
+            result = search(result)
 
         if select:
             def select_fn(fn, obj):
@@ -277,15 +279,15 @@ class QueryList(list):
             return None
 
         if postprocess:
-            result = list(filter_and_map(postprocess, result))
+            result = filter_and_map(postprocess, result)
 
         if single:
-            return result[0]
+            return next(result, None)
 
         if count:
-            return len(result)
+            return len(list(result))
 
-        return result
+        return result if stream else list(result)
 
 
 class QueryDictMixin(object):
