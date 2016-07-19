@@ -131,7 +131,7 @@ def wrap(obj):
         obj = obj.__getstate__()
 
     if hasattr(obj, '__next__'):
-        obj = list(obj)
+        obj = QueryIterator(obj)
 
     if type(obj) in (QueryDict, QueryList):
         return obj
@@ -143,6 +143,17 @@ def wrap(obj):
         return QueryList(obj)
 
     return obj
+
+
+class QueryIterator(object):
+    def __init__(self, iterable):
+        self.iterable = iterable
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return wrap(next(self.iterable))
 
 
 class QueryList(list):
