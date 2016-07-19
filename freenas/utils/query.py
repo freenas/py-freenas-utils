@@ -270,13 +270,10 @@ class QueryList(list):
                     result = sorted(result, key=lambda x: x[key], reverse=reverse)
 
         if offset:
-            result = result[offset:]
+            result = iter(list(result)[offset:])
 
         if limit:
-            result = result[:limit]
-
-        if not result and single:
-            return None
+            result = iter(list(result)[:limit])
 
         if postprocess:
             result = filter_and_map(postprocess, result)
