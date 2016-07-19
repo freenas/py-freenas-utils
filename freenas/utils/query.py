@@ -215,7 +215,7 @@ class QueryMixin(object):
         return result if stream else list(result)
 
 
-class QueryList(QueryMixin, dict):
+class QueryList(QueryMixin, list):
     def __init__(self, *args, **kwargs):
         super(QueryList, self).__init__(*args, **kwargs)
         for idx, v in enumerate(self):
