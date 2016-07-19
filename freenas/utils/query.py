@@ -145,18 +145,77 @@ def wrap(obj):
     return obj
 
 
-class QueryIterator(object):
-    def __init__(self, iterable):
-        self.iterable = iterable
+class QueryMixin(object):
+    def query(self, *rules, **params):
+        single = params.pop('single', False)
+        count = params.pop('count', None)
+        offset = params.pop('offset', None)
+        limit = params.pop('limit', None)
+        sort = params.pop('sort', None)
+        postprocess = params.pop('callback', None)
+        select = params.pop('select', None)
+        stream = params.pop('stream', False)
+        result = iter(self)
 
-    def __iter__(self):
-        return self
+        def search(data):
+            for i in data:
+                if matches(i, *rules):
+                    yield i
 
-    def __next__(self):
-        return wrap(next(self.iterable))
+        if rules:
+            result = search(result)
+
+        if select:
+            def select_fn(fn, obj):
+                obj = fn(obj) if fn else obj
+                obj = wrap(obj)
+
+                if isinstance(select, (list, tuple)):
+                    return [obj.get(i) for i in select]
+
+                if isinstance(select, str):
+                    return obj.get(select)
+
+            old = postprocess
+            postprocess = lambda o: select_fn(old, o)
+
+        if sort:
+            def sort_transform(result, key):
+                reverse = False
+                if key.startswith('-'):
+                    key = key[1:]
+                    reverse=True
+                result.append((key, reverse))
+
+            _sort = []
+            if isinstance(sort, string_types):
+                sort_transform(_sort, sort)
+            elif isinstance(sort, (tuple, list)):
+                for s in sort:
+                    sort_transform(_sort, s)
+            if _sort:
+                for key, reverse in reversed(_sort):
+                    result = sorted(result, key=lambda x: x[key], reverse=reverse)
+
+        if offset:
+            result = iter(list(result)[offset:])
+
+        if limit:
+            result = iter(list(result)[:limit])
+
+        if postprocess:
+            result = filter_and_map(postprocess, result)
+
+        if single:
+            return next(result, None)
+
+        if count:
+            return len(list(result))
+
+        return result if stream else list(result)
 
 
-class QueryList(list):
+class QueryList(QueryMixin, dict):
     def __init__(self, *args, **kwargs):
         super(QueryList, self).__init__(*args, **kwargs)
         for idx, v in enumerate(self):
@@ -229,73 +288,16 @@ class QueryList(list):
 
         super(QueryList, self).__setitem__(key, value)
 
-    def query(self, *rules, **params):
-        single = params.pop('single', False)
-        count = params.pop('count', None)
-        offset = params.pop('offset', None)
-        limit = params.pop('limit', None)
-        sort = params.pop('sort', None)
-        postprocess = params.pop('callback', None)
-        select = params.pop('select', None)
-        stream = params.pop('stream', False)
-        result = iter(self)
 
-        def search(data):
-            for i in data:
-                if matches(i, *rules):
-                    yield i
+class QueryIterator(QueryMixin, object):
+    def __init__(self, iterable):
+        self.iterable = iterable
 
-        if rules:
-            result = search(result)
+    def __iter__(self):
+        return self
 
-        if select:
-            def select_fn(fn, obj):
-                obj = fn(obj) if fn else obj
-                obj = wrap(obj)
-
-                if isinstance(select, (list, tuple)):
-                    return [obj.get(i) for i in select]
-
-                if isinstance(select, str):
-                    return obj.get(select)
-
-            old = postprocess
-            postprocess = lambda o: select_fn(old, o)
-
-        if sort:
-            def sort_transform(result, key):
-                reverse = False
-                if key.startswith('-'):
-                    key = key[1:]
-                    reverse=True
-                result.append((key, reverse))
-
-            _sort = []
-            if isinstance(sort, string_types):
-                sort_transform(_sort, sort)
-            elif isinstance(sort, (tuple, list)):
-                for s in sort:
-                    sort_transform(_sort, s)
-            if _sort:
-                for key, reverse in reversed(_sort):
-                    result = sorted(result, key=lambda x: x[key], reverse=reverse)
-
-        if offset:
-            result = iter(list(result)[offset:])
-
-        if limit:
-            result = iter(list(result)[:limit])
-
-        if postprocess:
-            result = filter_and_map(postprocess, result)
-
-        if single:
-            return next(result, None)
-
-        if count:
-            return len(list(result))
-
-        return result if stream else list(result)
+    def __next__(self):
+        return wrap(next(self.iterable))
 
 
 class QueryDictMixin(object):
