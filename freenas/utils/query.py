@@ -27,10 +27,8 @@
 
 import copy
 import re
-import inspect
 import collections
 import dateutil.parser
-
 from six import string_types
 
 
