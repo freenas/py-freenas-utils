@@ -37,6 +37,7 @@ import string
 import binascii
 import hashlib
 import fnmatch
+import threading
 from datetime import timedelta
 from string import Template
 from freenas.utils.trace_logger import TraceLogger
@@ -346,3 +347,16 @@ class SmartEventSet(object):
 
     def __exit__(self, type, value, traceback):
         self.evt.clear()
+
+
+class threadsafe_iterator(object):
+    def __init__(self, it):
+        self.it = it
+        self.lock = threading.Lock()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        with self.lock:
+            return self.it.__next__()
