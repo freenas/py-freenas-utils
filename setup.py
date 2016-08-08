@@ -24,6 +24,8 @@
 #
 #####################################################################
 
+import Cython.Compiler.Options
+Cython.Compiler.Options.annotate = True
 from setuptools import setup
 from freenas.utils import version
 from distutils.extension import Extension
@@ -47,6 +49,10 @@ setup(
     version=version.get_version(),
     url='http://github.com/freenas/middleware',
     packages=['freenas', 'freenas.utils'],
+    package_data={
+        'freenas': ['*.html', '*.c'],
+        'freenas.utils': ['*.html', '*.c']
+    },
     ext_modules=cythonize(extensions),
     license='BSD',
     description='Utility module for FreeNAS middleware',
