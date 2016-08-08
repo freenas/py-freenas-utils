@@ -125,14 +125,14 @@ def partition(s):
 
 
 def wrap(obj):
+    if type(obj) in (QueryDict, QueryList, QueryIterator):
+        return obj
+
     if hasattr(obj, '__getstate__'):
         obj = obj.__getstate__()
 
     if hasattr(obj, '__next__'):
         obj = QueryIterator(obj)
-
-    if type(obj) in (QueryDict, QueryList, QueryIterator):
-        return obj
 
     if isinstance(obj, dict):
         return QueryDict(obj)
@@ -286,6 +286,9 @@ class QueryList(QueryMixin, list):
 
         super(QueryList, self).__setitem__(key, value)
 
+    def append(self, v):
+        super(QueryList, self).append(wrap(v))
+
 
 class QueryIterator(QueryMixin, object):
     def __init__(self, iterable):
@@ -300,12 +303,19 @@ class QueryIterator(QueryMixin, object):
 
 class QueryDictMixin(object):
     def __init__(self, *args, **kwargs):
-        super(QueryDictMixin, self).__init__(*args, **kwargs)
-        for k, v in self.items():
+        source = args[0] if args else None
+        if source:
+            for k, v in source.items() if isinstance(source, dict) else source:
+                if isinstance(k, string_types):
+                    k = k.replace('.', r'\.')
+
+                self[k] = v
+
+        for k, v in kwargs.items():
             if isinstance(k, string_types):
                 k = k.replace('.', r'\.')
 
-            self[k] = wrap(v)
+            self[k] = v
 
     def __deepcopy__(self, memo):
         result = self.__class__.__new__(self.__class__)
