@@ -131,7 +131,7 @@ def wrap(obj):
     if hasattr(obj, '__next__'):
         obj = QueryIterator(obj)
 
-    if type(obj) in (QueryDict, QueryList):
+    if type(obj) in (QueryDict, QueryList, QueryIterator):
         return obj
 
     if isinstance(obj, dict):
@@ -301,7 +301,7 @@ class QueryIterator(QueryMixin, object):
 class QueryDictMixin(object):
     def __init__(self, *args, **kwargs):
         super(QueryDictMixin, self).__init__(*args, **kwargs)
-        for k, v in list(self.items()):
+        for k, v in self.items():
             if isinstance(k, string_types):
                 k = k.replace('.', r'\.')
 
@@ -310,7 +310,7 @@ class QueryDictMixin(object):
     def __deepcopy__(self, memo):
         result = self.__class__.__new__(self.__class__)
         memo[id(self)] = result
-        for k, v in list(self.items()):
+        for k, v in self.items():
             if isinstance(k, string_types):
                 k = k.replace('.', r'\.')
 
