@@ -116,12 +116,14 @@ def filter_and_map(fn, items):
 
 
 def partition(s):
-    res = re.split(r'(?<!\\)\.', s, maxsplit=1)
-    left = res[0].replace(r'\.', '.')
-    if len(res) == 1:
-        return left, None
+    pos = s.find('.')
+    if pos == -1:
+        return s, None
 
-    return left, res[1]
+    if s[pos - 1] == '\\':
+        return s.split('\.', 1)
+    else:
+        return s.split('.', 1)
 
 
 def wrap(obj):
