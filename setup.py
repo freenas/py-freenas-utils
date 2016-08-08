@@ -23,19 +23,31 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 #####################################################################
+
 from setuptools import setup
 from freenas.utils import version
+from distutils.extension import Extension
+from Cython.Build import cythonize
 
 
 install_requires = [
     'python-dateutil',
 ]
 
+extensions = [
+    Extension(
+        "freenas.utils.query",
+        ["freenas/utils/query.pyx"]
+    )
+]
+
+
 setup(
     name='freenas.utils',
     version=version.get_version(),
     url='http://github.com/freenas/middleware',
     packages=['freenas', 'freenas.utils'],
+    ext_modules=cythonize(extensions),
     license='BSD',
     description='Utility module for FreeNAS middleware',
     platforms='any',
