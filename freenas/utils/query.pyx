@@ -124,7 +124,7 @@ def partition(s):
         right = None
         left, middle = s.split('.', 1)
         left = left.replace('\\', '.')
-        if middle.find('.') != -1:
+        if '.' in middle:
             middle, right = middle.split('.', 1)
         return left + middle, right
     else:
