@@ -121,8 +121,11 @@ def partition(s):
         return s, None
 
     if s[pos - 1] == '\\':
-        left, middle, right = s.split('.', 2)
+        right = None
+        left, middle = s.split('.', 1)
         left = left.replace('\\', '.')
+        if middle.find('.') != -1:
+            middle, right = middle.split('.', 1)
         return left + middle, right
     else:
         return s.split('.', 1)
