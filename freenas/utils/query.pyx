@@ -85,7 +85,7 @@ def eval_field_operator(item, t):
     if len(t) == 4:
         right = conversions_table[t[3]](right)
 
-    return operators_table[op](item.get(left), right)
+    return operators_table[op](get(item, left), right)
 
 
 def eval_tuple(item, t):
@@ -129,6 +129,142 @@ def partition(s):
         return left + middle, right
     else:
         return s.split('.', 1)
+
+
+def get(obj, path, default=None):
+    right = path
+    ptr = obj
+    while right:
+        left, right = partition(right)
+
+        if isinstance(ptr, dict):
+            ptr = ptr.get(left)
+            continue
+
+        if isinstance(ptr, (list, tuple)):
+            left = int(left)
+            ptr = ptr[left] if left < len(ptr) else None
+            continue
+
+        return default
+
+    return ptr
+
+
+def set(obj, path, value):
+    right = path
+    ptr = obj
+    while right:
+        left, right = partition(right)
+        if not right:
+            break
+
+        if isinstance(ptr, dict):
+            if left in ptr:
+                ptr = ptr.get(left)
+                continue
+
+        if isinstance(ptr, (list, tuple)):
+            left = int(left)
+            if left < len(ptr):
+                ptr = ptr[left]
+                continue
+
+        raise ValueError('Enclosing object {0} doesn\'t exist'.format(left))
+
+    ptr[left] = value
+
+
+def contains(obj, path):
+    right = path
+    ptr = obj
+    while right:
+        left, right = partition(right)
+        if isinstance(ptr, dict):
+            if left in ptr:
+                ptr = ptr.get(left)
+                continue
+
+            return False
+
+        if isinstance(ptr, (list, tuple)):
+            left = int(left)
+            if left < len(ptr):
+                ptr = ptr[left]
+                continue
+
+            return False
+
+    return True
+
+
+def query(obj, *rules, **params):
+    single = params.pop('single', False)
+    count = params.pop('count', None)
+    offset = params.pop('offset', None)
+    limit = params.pop('limit', None)
+    sort = params.pop('sort', None)
+    postprocess = params.pop('callback', None)
+    select = params.pop('select', None)
+    stream = params.pop('stream', False)
+    result = iter(obj)
+
+    def search(data):
+        for i in data:
+            if matches(i, *rules):
+                yield i
+
+    if rules:
+        result = search(result)
+
+    if select:
+        def select_fn(fn, obj):
+            obj = fn(obj) if fn else obj
+
+            if isinstance(select, (list, tuple)):
+                return [get(obj, i) for i in select]
+
+            if isinstance(select, str):
+                return get(obj, select)
+
+        old = postprocess
+        postprocess = lambda o: select_fn(old, o)
+
+    if sort:
+        def sort_transform(result, key):
+            reverse = False
+            if key.startswith('-'):
+                key = key[1:]
+                reverse=True
+            result.append((key, reverse))
+
+        _sort = []
+        if isinstance(sort, string_types):
+            sort_transform(_sort, sort)
+        elif isinstance(sort, (tuple, list)):
+            for s in sort:
+                sort_transform(_sort, s)
+        if _sort:
+            for key, reverse in reversed(_sort):
+                result = sorted(result, key=lambda x: x[key], reverse=reverse)
+
+    if offset:
+        result = iter(list(result)[offset:])
+
+    if limit:
+        result = iter(list(result)[:limit])
+
+    if postprocess:
+        result = filter_and_map(postprocess, result)
+
+    if single:
+        return next(result, None)
+
+    if count:
+        return len(list(result))
+
+    return result if stream else list(result)
+
 
 
 def wrap(obj):

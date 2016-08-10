@@ -36,7 +36,6 @@ TRACE = logging.DEBUG-5
 
 
 class TraceLogger(logging.Logger):
-
     def __init__(self, name):
         logging.Logger.__init__(self, name)
         logging.addLevelName(TRACE, 'TRACE')
