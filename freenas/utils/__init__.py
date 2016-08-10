@@ -258,19 +258,6 @@ def xsendmsg(sock, buffer, ancdata=None):
         ancdata = None
 
 
-def in_directory(d1, d2):
-    d1 = os.path.join(os.path.realpath(d1), '')
-    d2 = os.path.join(os.path.realpath(d2), '')
-    if d1 == d2:
-        return True
-
-    return os.path.commonprefix([d1, d2]) == d2
-
-
-def is_ascii(s):
-    return len(s) == len(s.encode())
-
-
 def xrecvmsg(sock, length, anclength=None):
     done = 0
     message = b''
@@ -290,6 +277,19 @@ def xrecvmsg(sock, length, anclength=None):
         ancdata += anc
 
     return message, ancdata
+
+
+def in_directory(d1, d2):
+    d1 = os.path.join(os.path.realpath(d1), '')
+    d2 = os.path.join(os.path.realpath(d2), '')
+    if d1 == d2:
+        return True
+
+    return os.path.commonprefix([d1, d2]) == d2
+
+
+def is_ascii(s):
+    return len(s) == len(s.encode())
 
 
 def sha256(fname, b_size=65536):
