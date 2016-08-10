@@ -25,9 +25,7 @@
 #
 #####################################################################
 
-import copy
 import re
-import collections
 import dateutil.parser
 from six import string_types
 
@@ -131,27 +129,7 @@ def partition(s):
         return s.split('.', 1)
 
 
-def get(obj, path, default=None):
-    right = path
-    ptr = obj
-    while right:
-        left, right = partition(right)
-
-        if isinstance(ptr, dict):
-            ptr = ptr.get(left)
-            continue
-
-        if isinstance(ptr, (list, tuple)):
-            left = int(left)
-            ptr = ptr[left] if left < len(ptr) else None
-            continue
-
-        return default
-
-    return ptr
-
-
-def set(obj, path, value):
+def deep_get(obj, path):
     right = path
     ptr = obj
     while right:
@@ -172,7 +150,49 @@ def set(obj, path, value):
 
         raise ValueError('Enclosing object {0} doesn\'t exist'.format(left))
 
-    ptr[left] = value
+    return ptr, left
+
+
+def get(obj, path, default=None):
+    if not isinstance(path, string_types):
+        try:
+            return obj[path]
+        except (KeyError, IndexError):
+            return default
+
+    right = path
+    ptr = obj
+    while right:
+        left, right = partition(right)
+
+        if isinstance(ptr, dict):
+            ptr = ptr.get(left)
+            continue
+
+        if isinstance(ptr, (list, tuple)):
+            left = int(left)
+            ptr = ptr[left] if left < len(ptr) else None
+            continue
+
+        return default
+
+    return ptr
+
+
+def set(obj, path, value):
+    if not isinstance(path, string_types):
+        obj[path] = value
+    else:
+        ptr, left = deep_get(obj, path)
+        ptr[left] = value
+
+
+def delete(obj, path):
+    if isinstance(path, string_types):
+        ptr, left = deep_get(obj, path)
+        del ptr[left]
+    else:
+        del obj[path]
 
 
 def contains(obj, path):
@@ -264,292 +284,3 @@ def query(obj, *rules, **params):
         return len(list(result))
 
     return result if stream else list(result)
-
-
-
-def wrap(obj):
-    if type(obj) in (QueryDict, QueryList, QueryIterator):
-        return obj
-
-    if hasattr(obj, '__getstate__'):
-        obj = obj.__getstate__()
-
-    if hasattr(obj, '__next__'):
-        obj = QueryIterator(obj)
-
-    if isinstance(obj, dict):
-        return QueryDict(obj)
-
-    if isinstance(obj, (list, tuple)):
-        return QueryList(obj)
-
-    return obj
-
-
-class QueryMixin(object):
-    def query(self, *rules, **params):
-        single = params.pop('single', False)
-        count = params.pop('count', None)
-        offset = params.pop('offset', None)
-        limit = params.pop('limit', None)
-        sort = params.pop('sort', None)
-        postprocess = params.pop('callback', None)
-        select = params.pop('select', None)
-        stream = params.pop('stream', False)
-        result = iter(self)
-
-        def search(data):
-            for i in data:
-                if matches(i, *rules):
-                    yield i
-
-        if rules:
-            result = search(result)
-
-        if select:
-            def select_fn(fn, obj):
-                obj = fn(obj) if fn else obj
-                obj = wrap(obj)
-
-                if isinstance(select, (list, tuple)):
-                    return [obj.get(i) for i in select]
-
-                if isinstance(select, str):
-                    return obj.get(select)
-
-            old = postprocess
-            postprocess = lambda o: select_fn(old, o)
-
-        if sort:
-            def sort_transform(result, key):
-                reverse = False
-                if key.startswith('-'):
-                    key = key[1:]
-                    reverse=True
-                result.append((key, reverse))
-
-            _sort = []
-            if isinstance(sort, string_types):
-                sort_transform(_sort, sort)
-            elif isinstance(sort, (tuple, list)):
-                for s in sort:
-                    sort_transform(_sort, s)
-            if _sort:
-                for key, reverse in reversed(_sort):
-                    result = sorted(result, key=lambda x: x[key], reverse=reverse)
-
-        if offset:
-            result = iter(list(result)[offset:])
-
-        if limit:
-            result = iter(list(result)[:limit])
-
-        if postprocess:
-            result = filter_and_map(postprocess, result)
-
-        if single:
-            return next(result, None)
-
-        if count:
-            return len(list(result))
-
-        return result if stream else list(result)
-
-
-class QueryList(QueryMixin, list):
-    def __init__(self, *args, **kwargs):
-        super(QueryList, self).__init__(*args, **kwargs)
-        for idx, v in enumerate(self):
-            self[idx] = wrap(v)
-
-    def __getitem__(self, item):
-        if isinstance(item, string_types):
-            if item.isdigit():
-                return super(QueryList, self).__getitem__(int(item))
-
-            left, right = partition(item)
-            return super(QueryList, self).__getitem__(int(left))[right]
-
-        return super(QueryList, self).__getitem__(item)
-
-    def contains_path(self, item):
-        if item.isdigit():
-            return int(item) < len(self)
-
-        left, right = partition(item)
-
-        try:
-            tmp = self[left]
-        except IndexError:
-            return False
-
-        return tmp.contains_path(right)
-
-    def __setitem__(self, key, value):
-        value = wrap(value)
-
-        if isinstance(key, string_types):
-            if key.isdigit():
-                index = int(key)
-                if index >= len(self):
-                    self.extend([None] * (index - len(self) + 1))
-
-                super(QueryList, self).__setitem__(index, value)
-                return
-
-            left, right = partition(key)
-            self[left][right] = value
-
-        super(QueryList, self).__setitem__(key, value)
-
-    def get(self, key, d=None):
-        if isinstance(key, string_types):
-            key = int(key)
-
-        return self[key] if len(self) > key else d
-
-    def set(self, key, value):
-        value = wrap(value)
-
-        if isinstance(key, string_types):
-            if key.isdigit():
-                self[key] = value
-                return
-
-            left, right = partition(key)
-
-            if left not in self:
-                ll, _ = partition(right)
-                if ll.isdigit():
-                    self[left] = []
-                else:
-                    self[left] = {}
-
-            self[left].set(right, value)
-
-        super(QueryList, self).__setitem__(key, value)
-
-    def append(self, v):
-        super(QueryList, self).append(wrap(v))
-
-
-class QueryIterator(QueryMixin, object):
-    def __init__(self, iterable):
-        self.iterable = iterable
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        return wrap(next(self.iterable))
-
-
-class QueryDictMixin(object):
-    def __init__(self, *args, **kwargs):
-        source = args[0] if args else None
-        if source:
-            for k, v in source.items() if isinstance(source, dict) else source:
-                if isinstance(k, string_types):
-                    k = k.replace('.', r'\.')
-
-                self[k] = v
-
-        for k, v in kwargs.items():
-            if isinstance(k, string_types):
-                k = k.replace('.', r'\.')
-
-            self[k] = v
-
-    def __deepcopy__(self, memo):
-        result = self.__class__.__new__(self.__class__)
-        memo[id(self)] = result
-        for k, v in self.items():
-            if isinstance(k, string_types):
-                k = k.replace('.', r'\.')
-
-            result[k] = copy.deepcopy(v, memo)
-
-        return result
-
-    def __getitem__(self, item):
-        if not isinstance(item, string_types):
-            return super(QueryDictMixin, self).__getitem__(item)
-
-        if super(QueryDictMixin, self).__contains__(item):
-            return super(QueryDictMixin, self).__getitem__(item)
-
-        left, right = partition(item)
-
-        if not right:
-            return super(QueryDictMixin, self).__getitem__(left)
-
-        return super(QueryDictMixin, self).__getitem__(left)[right]
-
-    def __setitem__(self, key, value):
-        value = wrap(value)
-
-        if not isinstance(key, string_types):
-            return super(QueryDictMixin, self).__setitem__(key, value)
-
-        left, right = partition(key)
-
-        if not right:
-            return super(QueryDictMixin, self).__setitem__(left, value)
-
-        self[left][right] = value
-
-    def contains_path(self, item):
-        return item in self
-
-    def __contains__(self, item):
-        if not isinstance(item, string_types):
-            return super(QueryDictMixin, self).__contains__(item)
-
-        left, right = partition(item)
-
-        if not right:
-            return super(QueryDictMixin, self).__contains__(left)
-
-        try:
-            tmp = self[left]
-        except KeyError:
-            return False
-
-        if not isinstance(tmp, (QueryDict, QueryList)):
-            return False
-
-        return tmp.contains_path(right)
-
-    def get(self, k, d=None):
-        return self[k] if k in self else d
-
-    def set(self, key, value):
-        value = wrap(value)
-
-        if not isinstance(key, string_types):
-            return super(QueryDictMixin, self).__setitem__(key, value)
-
-        left, right = partition(key)
-
-        if not right:
-            return super(QueryDictMixin, self).__setitem__(left, value)
-
-        if left not in self:
-            ll, _ = partition(right)
-            if ll.isdigit():
-                self[left] = []
-            else:
-                self[left] = {}
-
-        self[left].set(right, value)
-
-    def query(self, *rules, **params):
-        return wrap(list(self.values())).query(*rules, **params)
-
-
-class QueryDict(QueryDictMixin, dict):
-    pass
-
-
-class OrderedQueryDict(QueryDictMixin, collections.OrderedDict):
-    pass

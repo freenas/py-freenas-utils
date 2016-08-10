@@ -24,40 +24,39 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 #####################################################################
-from freenas.utils.query import wrap
+from freenas.utils.query import get
 import stat
 import re
 
 
 def modes_to_oct(modes):
-    modes = wrap(modes)
     result = 0
 
-    if modes['user.read']:
+    if get(modes, 'user.read'):
         result |= stat.S_IRUSR
 
-    if modes['user.write']:
+    if get(modes, 'user.write'):
         result |= stat.S_IWUSR
 
-    if modes['user.execute']:
+    if get(modes, 'user.execute'):
         result |= stat.S_IXUSR
 
-    if modes['group.read']:
+    if get(modes, 'group.read'):
         result |= stat.S_IRGRP
 
-    if modes['group.write']:
+    if get(modes, 'group.write'):
         result |= stat.S_IWGRP
 
-    if modes['group.execute']:
+    if get(modes, 'group.execute'):
         result |= stat.S_IXGRP
 
-    if modes['others.read']:
+    if get(modes, 'others.read'):
         result |= stat.S_IROTH
 
-    if modes['others.write']:
+    if get(modes, 'others.write'):
         result |= stat.S_IWOTH
 
-    if modes['others.execute']:
+    if get(modes, 'others.execute'):
         result |= stat.S_IXOTH
 
     return result
