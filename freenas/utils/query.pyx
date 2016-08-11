@@ -129,30 +129,6 @@ def partition(s):
         return s.split('.', 1)
 
 
-def deep_get(obj, path):
-    right = path
-    ptr = obj
-    while right:
-        left, right = partition(right)
-        if not right:
-            break
-
-        if isinstance(ptr, dict):
-            if left in ptr:
-                ptr = ptr.get(left)
-                continue
-
-        if isinstance(ptr, (list, tuple)):
-            left = int(left)
-            if left < len(ptr):
-                ptr = ptr[left]
-                continue
-
-        raise ValueError('Enclosing object {0} doesn\'t exist'.format(left))
-
-    return ptr, left
-
-
 def get(obj, path, default=None):
     if not isinstance(path, string_types):
         try:
@@ -183,13 +159,73 @@ def set(obj, path, value):
     if not isinstance(path, string_types):
         obj[path] = value
     else:
-        ptr, left = deep_get(obj, path)
+        right = path
+        ptr = obj
+        while right:
+            left, right = partition(right)
+            if not right:
+                break
+
+            if left not in ptr:
+                ll, _ = partition(right)
+                if ll.isdigit():
+                    ptr[left] = []
+                else:
+                    ptr[left] = {}
+
+            if isinstance(ptr, dict):
+                if left not in ptr:
+                    ll, _ = partition(right)
+                    if ll.isdigit():
+                        ptr[left] = []
+                    else:
+                        ptr[left] = {}
+
+                ptr = ptr[left]
+                continue
+
+            if isinstance(ptr, (list, tuple)):
+                left = int(left)
+                l = len(ptr)
+                if left <= l:
+                    if left == l:
+                        ll, _ = partition(right)
+                        if ll.isdigit():
+                            ptr.append([])
+                        else:
+                            ptr.append({})
+
+                    ptr = ptr[left]
+                    continue
+                else:
+                    raise IndexError('Index {0} is out of set/append range'.format(left))
+
+            raise ValueError('Cannot set unsupported object type {0}'.format(type(ptr)))
+
         ptr[left] = value
 
 
 def delete(obj, path):
     if isinstance(path, string_types):
-        ptr, left = deep_get(obj, path)
+        right = path
+        ptr = obj
+        while right:
+            left, right = partition(right)
+            if not right:
+                break
+
+            if isinstance(ptr, dict):
+                if left in ptr:
+                    ptr = ptr.get(left)
+                    continue
+
+            if isinstance(ptr, (list, tuple)):
+                left = int(left)
+                if left < len(ptr):
+                    ptr = ptr[left]
+                    continue
+
+            raise ValueError('Enclosing object {0} doesn\'t exist'.format(left))
         del ptr[left]
     else:
         del obj[path]
