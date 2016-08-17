@@ -195,6 +195,9 @@ def set(obj, path, value):
 
             raise ValueError('Cannot set unsupported object type {0}'.format(type(ptr)))
 
+        if isinstance(ptr, (list, tuple)):
+            left = int(left)
+            
         ptr[left] = value
 
 
