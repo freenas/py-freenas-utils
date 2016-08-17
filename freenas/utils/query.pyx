@@ -195,10 +195,21 @@ def set(obj, path, value):
 
             raise ValueError('Cannot set unsupported object type {0}'.format(type(ptr)))
 
-        if isinstance(ptr, (list, tuple)):
+        if isinstance(ptr, dict):
+            ptr[left] = value
+
+        elif isinstance(ptr, (list, tuple)):
             left = int(left)
-            
-        ptr[left] = value
+            l = len(ptr)
+            if left < l:
+                ptr[left] = value
+            elif left == l:
+                ptr.append(value)
+            else:
+                raise IndexError('Index {0} is out of set/append range'.format(left))
+
+        else:
+            raise ValueError('Cannot set unsupported object type {0}'.format(type(ptr)))
 
 
 def delete(obj, path):
