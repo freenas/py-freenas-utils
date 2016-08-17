@@ -166,13 +166,6 @@ def set(obj, path, value):
             if not right:
                 break
 
-            if left not in ptr:
-                ll, _ = partition(right)
-                if ll.isdigit():
-                    ptr[left] = []
-                else:
-                    ptr[left] = {}
-
             if isinstance(ptr, dict):
                 if left not in ptr:
                     ll, _ = partition(right)
