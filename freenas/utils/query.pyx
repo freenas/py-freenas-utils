@@ -309,7 +309,7 @@ def query(obj, *rules, **params):
                 sort_transform(_sort, s)
         if _sort:
             for key, reverse in reversed(_sort):
-                result = sorted(result, key=lambda x: x[key], reverse=reverse)
+                result = sorted(result, key=lambda x: get(x, key), reverse=reverse)
 
     if offset:
         result = iter(list(result)[offset:])
