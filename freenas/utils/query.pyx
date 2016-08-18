@@ -310,6 +310,7 @@ def query(obj, *rules, **params):
         if _sort:
             for key, reverse in reversed(_sort):
                 result = sorted(result, key=lambda x: get(x, key), reverse=reverse)
+            result = iter(result)
 
     if offset:
         result = iter(list(result)[offset:])
