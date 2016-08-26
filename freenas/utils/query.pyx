@@ -26,6 +26,7 @@
 #####################################################################
 
 import re
+import itertools
 import dateutil.parser
 from six import string_types
 
@@ -316,7 +317,7 @@ def query(obj, *rules, **params):
         result = iter(list(result)[offset:])
 
     if limit:
-        result = iter(list(result)[:limit])
+        result = itertools.islice(result, 0, limit)
 
     if postprocess:
         result = filter_and_map(postprocess, result)
