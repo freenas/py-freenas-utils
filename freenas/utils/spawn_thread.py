@@ -48,7 +48,7 @@ def wrapper(fn, *args, **kwargs):
 
 if not gevent_monkey_patched():
     from concurrent.futures import ThreadPoolExecutor
-    _thread_pool = ThreadPoolExecutor(30)
+    _thread_pool = ThreadPoolExecutor(10)
     _gevent = False
 else:
     _gevent = True
