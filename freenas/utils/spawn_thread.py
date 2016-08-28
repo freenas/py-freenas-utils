@@ -26,6 +26,7 @@
 #####################################################################
 
 import threading
+import logging
 
 
 def gevent_monkey_patched():
@@ -35,6 +36,14 @@ def gevent_monkey_patched():
         return False
     else:
         return bool(monkey.saved)
+
+
+def wrapper(fn, *args, **kwargs):
+    try:
+        fn(*args, **kwargs)
+    except:
+        logging.exception('Exception in thread {0}'.format(threading.current_thread().name))
+        raise
 
 
 if not gevent_monkey_patched():
@@ -47,8 +56,8 @@ else:
 
 def spawn_thread(*args, **kwargs):
     if not _gevent and kwargs.pop('threadpool', None):
-        return _thread_pool.submit(*args, **kwargs)
+        return _thread_pool.submit(wrapper, *args, **kwargs)
 
-    t = threading.Thread(target=args[0], args=args[1:], daemon=True)
+    t = threading.Thread(target=wrapper, args=args, daemon=True)
     t.start()
     return t
