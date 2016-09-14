@@ -92,6 +92,12 @@ class limit(object):
             if self.calls <= self.limit:
                 return fn(*args, **kwargs)
             else:
-                return None
+                raise RuntimeError(
+                    'Limit of calls reached: {0} in {1}. Wait for {2} before trying again'.format(
+                        self.limit,
+                        self.throttle_period,
+                        str(self.throttle_period - time_since_first_call).split('.')[0]
+                    )
+                )
 
         return wrapper
