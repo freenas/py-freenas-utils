@@ -67,3 +67,31 @@ class throttle(object):
                 return fn(*args, **kwargs)
 
         return wrapper
+
+
+class limit(object):
+    def __init__(self, limit=0, seconds=0, minutes=0, hours=0):
+        self.throttle_period = timedelta(
+            seconds=seconds, minutes=minutes, hours=hours
+        )
+        self.time_of_first_call = datetime.min
+        self.limit = limit
+        self.calls = 0
+
+    def __call__(self, fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            now = datetime.now()
+            time_since_first_call = now - self.time_of_first_call
+
+            if time_since_first_call > self.throttle_period:
+                self.time_of_first_call = now
+                self.calls = 0
+
+            self.calls += 1
+            if self.calls < self.limit:
+                return fn(*args, **kwargs)
+            else:
+                return None
+
+        return wrapper
