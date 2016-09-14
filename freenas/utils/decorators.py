@@ -89,7 +89,7 @@ class limit(object):
                 self.calls = 0
 
             self.calls += 1
-            if self.calls < self.limit:
+            if self.calls <= self.limit:
                 return fn(*args, **kwargs)
             else:
                 return None
