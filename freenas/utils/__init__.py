@@ -38,6 +38,8 @@ import binascii
 import hashlib
 import fnmatch
 import threading
+import traceback
+import inspect
 from datetime import timedelta
 from string import Template
 from freenas.utils.trace_logger import TraceLogger
@@ -308,6 +310,26 @@ def crypted_password(cleartext):
 def nt_password(cleartext):
     nthash = hashlib.new('md4', cleartext.encode('utf-16le')).digest()
     return binascii.hexlify(nthash).decode('utf-8').upper()
+
+
+def serialize_exception(exception, tb):
+    frames = [
+        {
+            'filename': f[0],
+            'lineno': f[1],
+            'method': f[2],
+            'code': f[3]
+        }
+        for f in traceback.extract_tb(tb)
+    ]
+
+    return {
+        'frames': frames,
+        'exception': {
+            'class': exception.__class.__name,
+            'message': str(exception)
+        }
+    }
 
 
 class FaultTolerantLogHandler(logging.handlers.WatchedFileHandler):
