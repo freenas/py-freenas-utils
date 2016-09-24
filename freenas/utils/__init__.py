@@ -326,7 +326,7 @@ def serialize_exception(exception, tb):
     return {
         'frames': frames,
         'exception': {
-            'class': exception.__class.__name,
+            'class': exception.__class__.__name__,
             'message': str(exception)
         }
     }
@@ -338,37 +338,6 @@ class FaultTolerantLogHandler(logging.handlers.WatchedFileHandler):
             logging.handlers.WatchedFileHandler.emit(self, record)
         except IOError:
             pass
-
-
-class SmartEventSet(object):
-    """
-    A small class to enable context manager based event sets.
-    i.e. using event set/unset via a 'with' statement.
-
-    Usage:
-    with SmartEventSet(threading.Event()):
-        do_your_code
-
-    What this will do is that it will set the event supplied to it upon enetering the context
-    and upon exit it will clear the event.
-
-    Thus this is equivalent of doing the following:
-        evt = threading.Event()
-        evt.set()
-        your_code_snippet_here
-        evt.clear()
-    """
-
-    def __init__(self, evt):
-        self.evt = evt
-
-    def __enter__(self):
-        self.evt.set()
-        # Return event just for the purposes of the `with SmartEventSet(foo) as bar`
-        return self.evt
-
-    def __exit__(self, type, value, traceback):
-        self.evt.clear()
 
 
 class threadsafe_iterator(object):
