@@ -312,8 +312,8 @@ def nt_password(cleartext):
     return binascii.hexlify(nthash).decode('utf-8').upper()
 
 
-def serialize_exception(exception, tb):
-    frames = [
+def serialize_traceback(tb):
+    return [
         {
             'filename': f[0],
             'lineno': f[1],
@@ -323,8 +323,10 @@ def serialize_exception(exception, tb):
         for f in traceback.extract_tb(tb)
     ]
 
+
+def serialize_exception(exception, tb=None):
     return {
-        'frames': frames,
+        'frames': tb or serialize_traceback(exception.__traceback__),
         'exception': {
             'class': exception.__class__.__name__,
             'message': str(exception)
