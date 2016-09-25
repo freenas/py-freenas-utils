@@ -313,6 +313,7 @@ def nt_password(cleartext):
 
 
 def serialize_traceback(tb):
+    iter_tb = tb if isinstance(tb, (list, tuple)) else traceback.extract_tb(tb)
     return [
         {
             'filename': f[0],
@@ -320,7 +321,7 @@ def serialize_traceback(tb):
             'method': f[2],
             'code': f[3]
         }
-        for f in traceback.extract_tb(tb)
+        for f in iter_tb
     ]
 
 
