@@ -28,7 +28,7 @@ import ipaddress
 
 
 def is_ipv6(address):
-    return isinstance(ipaddress.ip_address(address), ipaddress.IPv6Address)
+    return isinstance(ipaddress.ip_address(address.split('%')[0] if '%' in address else address), ipaddress.IPv6Address)
 
 
 def wrap_address(address):
