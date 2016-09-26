@@ -31,6 +31,20 @@ import dateutil.parser
 from six import string_types
 
 
+def op_in(x, y):
+    if isinstance(y, (list, tuple)):
+        return x in y
+
+    return y in x
+
+
+def op_nin(x, y):
+    if isinstance(y, (list, tuple)):
+        return x not in y
+
+    return y not in x
+
+
 operators_table = {
     '=': lambda x, y: x == y,
     '!=': lambda x, y: x != y,
@@ -39,8 +53,8 @@ operators_table = {
     '>=': lambda x, y: x >= y,
     '<=': lambda x, y: x <= y,
     '~': lambda x, y: re.search(str(y), str(x)),
-    'in': lambda x, y: y in x,
-    'nin': lambda x, y: y not in x
+    'in': op_in,
+    'nin': op_nin
 }
 
 
