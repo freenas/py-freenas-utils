@@ -54,7 +54,9 @@ operators_table = {
     '<=': lambda x, y: x <= y,
     '~': lambda x, y: re.search(str(y), str(x)),
     'in': op_in,
-    'nin': op_nin
+    'nin': op_nin,
+    'contains': lambda x, y: y in x,
+    'ncontains': lambda x, y: y not in x
 }
 
 
