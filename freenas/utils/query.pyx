@@ -39,8 +39,8 @@ operators_table = {
     '>=': lambda x, y: x >= y,
     '<=': lambda x, y: x <= y,
     '~': lambda x, y: re.search(str(y), str(x)),
-    'in': lambda x, y: x in y,
-    'nin': lambda x, y: x not in y
+    'in': lambda x, y: y in x,
+    'nin': lambda x, y: y not in x
 }
 
 
