@@ -159,7 +159,7 @@ def get(obj, path, default=None):
         left, right = partition(right)
 
         if isinstance(ptr, dict):
-            ptr = ptr.get(left)
+            ptr = ptr.get(left, default)
             continue
 
         if isinstance(ptr, (list, tuple)):
