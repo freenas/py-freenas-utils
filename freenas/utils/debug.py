@@ -29,6 +29,7 @@ import errno
 import sys
 import gc
 import traceback
+import tracemalloc
 from freenas.dispatcher.rpc import RpcService, RpcException, private
 
 
@@ -97,3 +98,16 @@ class DebugService(RpcService):
         if self.backdoor_server:
             self.backdoor_server.close()
             self.backdoor_server = None
+
+    @private
+    def start_tracemalloc(self):
+        tracemalloc.start()
+
+    @private
+    def stop_tracemalloc(self):
+        tracemalloc.stop()
+
+    @private
+    def snapshot_tracemalloc(self):
+        snap = tracemalloc.take_snapshot()
+        return [str(i) for i in snap.statistics('lineno')[:100]]
