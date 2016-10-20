@@ -39,7 +39,7 @@ import hashlib
 import fnmatch
 import threading
 import traceback
-import inspect
+import contextlib
 from datetime import timedelta
 from string import Template
 from freenas.utils.trace_logger import TraceLogger
@@ -335,14 +335,6 @@ def serialize_exception(exception, tb=None):
     }
 
 
-class FaultTolerantLogHandler(logging.handlers.WatchedFileHandler):
-    def emit(self, record):
-        try:
-            logging.handlers.WatchedFileHandler.emit(self, record)
-        except IOError:
-            pass
-
-
 class threadsafe_iterator(object):
     def __init__(self, it):
         self.it = it
@@ -354,3 +346,22 @@ class threadsafe_iterator(object):
     def __next__(self):
         with self.lock:
             return self.it.__next__()
+
+
+@contextlib.contextmanager
+def create_with_mode(path, mode):
+    umask = os.umask(0)
+    try:
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT, mode)
+        with open(fd, 'w') as f:
+            yield f
+    finally:
+        os.umask(umask)
+
+
+class FaultTolerantLogHandler(logging.handlers.WatchedFileHandler):
+    def emit(self, record):
+        try:
+            logging.handlers.WatchedFileHandler.emit(self, record)
+        except IOError:
+            pass
