@@ -133,7 +133,7 @@ def pop_filter(filter, prop):
 
 def test_filter(t, value):
     if not t:
-        return False
+        return True
 
     op, v = t
     return operators_table[op](v, value)
