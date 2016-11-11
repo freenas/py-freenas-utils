@@ -28,6 +28,7 @@
 import re
 import itertools
 import dateutil.parser
+from freenas.utils import list_startswith
 from six import string_types
 
 
@@ -119,6 +120,35 @@ def matches(obj, *rules):
             break
 
     return not fail
+
+
+def pop_filter(filter, prop):
+    for i in filter:
+        if len(i) == 3:
+            name, op, value = i
+            if name == prop:
+                filter.remove(i)
+                return op, value
+
+
+def test_filter(t, value):
+    if not t:
+        return False
+
+    op, v = t
+    return operators_table[op](v, value)
+
+
+def exclude_from_filter(filter, *props):
+    for i in list(filter):
+        if len(i) == 3:
+            name, _, _ = i
+            for p in props:
+                if list_startswith(name.split('.'), p.split('.')):
+                    filter.remove(i)
+        if len(i) == 2:
+            _, pred = i
+            exclude_from_filter(pred, *props)
 
 
 def filter_and_map(fn, items):
