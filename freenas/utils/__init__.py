@@ -102,6 +102,10 @@ def normalize(d, d2):
     return d
 
 
+def list_startswith(l1, l2):
+    return l1[:len(l2)] == l2
+
+
 def force_none(v):
     if not v:
         return None
