@@ -227,18 +227,19 @@ def set(obj, path, value):
             if isinstance(ptr, (list, tuple)):
                 left = int(left)
                 l = len(ptr)
-                if left <= l:
-                    if left == l:
-                        ll, _ = partition(right)
-                        if ll.isdigit():
-                            ptr.append([])
-                        else:
-                            ptr.append({})
+                if left >= l:
+                    while left > l:
+                        ptr.append(None)
+                        l = len(ptr)
 
-                    ptr = ptr[left]
-                    continue
-                else:
-                    raise IndexError('Index {0} is out of set/append range'.format(left))
+                    ll, _ = partition(right)
+                    if ll.isdigit():
+                        ptr.append([])
+                    else:
+                        ptr.append({})
+
+                ptr = ptr[left]
+                continue
 
             raise ValueError('Cannot set unsupported object type {0}'.format(type(ptr)))
 
@@ -250,10 +251,12 @@ def set(obj, path, value):
             l = len(ptr)
             if left < l:
                 ptr[left] = value
-            elif left == l:
-                ptr.append(value)
             else:
-                raise IndexError('Index {0} is out of set/append range'.format(left))
+                while left > l:
+                    ptr.append(None)
+                    l = len(ptr)
+
+                ptr.append(value)
 
         else:
             raise ValueError('Cannot set unsupported object type {0}'.format(type(ptr)))
