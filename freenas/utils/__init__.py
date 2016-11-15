@@ -356,7 +356,7 @@ class threadsafe_iterator(object):
 def create_with_mode(path, mode):
     umask = os.umask(0)
     try:
-        fd = os.open(path, os.O_WRONLY | os.O_CREAT, mode)
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, mode)
         with open(fd, 'w') as f:
             yield f
     finally:
