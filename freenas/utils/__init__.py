@@ -54,7 +54,7 @@ ESCAPE_SEQUENCE_RE = re.compile(r'''
     | \\[\\'"abfnrtv]  # Single-character escapes
     )''', re.UNICODE | re.VERBOSE)
 
-LOGGING_FORMAT = '%(asctime)s %(levelname)s %(name) %(filename)s:%(lineno)d %(message)s'
+LOGGING_FORMAT = '%(asctime)s %(levelname)s %(name)s %(filename)s:%(lineno)d %(message)s'
 
 
 def first_or_default(f, iterable, default=None):
