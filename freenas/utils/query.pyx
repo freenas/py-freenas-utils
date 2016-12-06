@@ -165,15 +165,17 @@ def partition(s):
     if pos == -1:
         return s, None
 
-    if s[pos - 1] == '\\':
-        right = None
-        left, middle = s.split('.', 1)
-        left = left.replace('\\', '.')
-        if '.' in middle:
-            middle, right = middle.split('.', 1)
-        return left + middle, right
-    else:
-        return s.split('.', 1)
+    right = s
+    left = ''
+    while right[pos - 1] == '\\':
+        middle, right = right.split('.', 1)
+        left += middle.replace('\\', '.')
+        pos = right.find('.')
+        if pos == -1:
+            return left + right, None
+        
+    middle, right = right.split('.', 1)
+    return left + middle, right
 
 
 def get(obj, path, default=None):
