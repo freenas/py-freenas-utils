@@ -372,7 +372,7 @@ class FaultTolerantLogHandler(logging.handlers.WatchedFileHandler):
 
 
 def human_readable_bytes(num, suffix=''):
-    for unit in ['B','KiB','MiB','GiB','TiB','PiB','EiB','ZiB']:
+    for unit in ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB']:
         if abs(num) < 1024.0:
             return "%3.1f%s%s" % (num, unit, suffix)
         num /= 1024.0
