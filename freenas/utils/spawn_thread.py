@@ -51,13 +51,25 @@ if not gevent_monkey_patched():
     _thread_pool = ThreadPoolExecutor(10)
     _gevent = False
 else:
+    import gevent
     _gevent = True
 
 
 def spawn_thread(*args, **kwargs):
-    if not _gevent and kwargs.pop('threadpool', None):
+    if _gevent:
+        kwargs.pop('threadpool', None)
+        return gevent.spawn(*args, **kwargs)
+
+    if kwargs.pop('threadpool', None):
         return _thread_pool.submit(wrapper, *args, **kwargs)
 
     t = threading.Thread(target=wrapper, args=args, daemon=True)
     t.start()
     return t
+
+
+def kill_thread(td):
+    if not _gevent:
+        raise RuntimeError('Unkillable thread')
+
+    gevent.kill(td, block=False)
