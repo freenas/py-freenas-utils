@@ -38,8 +38,8 @@ def count_files(directory):
     return len(files)
 
 
-def copytree(src, dst, symlinks=False, progress_callback=None):
-    names = os.listdir(src)
+def copytree(src, dst, symlinks=False, progress_callback=None, exclude=None):
+    names = [name for name in os.listdir(src) if not exclude or name not in exclude]
 
     try:
         os.makedirs(dst)
