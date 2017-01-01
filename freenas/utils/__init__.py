@@ -298,6 +298,10 @@ def is_ascii(s):
     return len(s) == len(s.encode())
 
 
+def remove_non_printable(s):
+    return ''.join(x for x in s if x in string.printable)
+
+
 def sha256(fname, b_size=65536):
     hash_sha256 = hashlib.sha256()
     with open(fname, "rb") as f:
