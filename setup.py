@@ -30,6 +30,7 @@ Cython.Compiler.Options.annotate = True
 from setuptools import setup
 from freenas.utils import version
 from Cython.Distutils.extension import Extension
+from Cython.Distutils import build_ext
 
 
 install_requires = [
@@ -47,12 +48,13 @@ extensions = [
 setup(
     name='freenas.utils',
     version=version.get_version(),
-    url='http://github.com/freenas/middleware',
+    url='http://github.com/freenas/py-freenas-utils',
     packages=['freenas', 'freenas.utils'],
     package_data={
         'freenas': ['*.html', '*.c'],
         'freenas.utils': ['*.html', '*.c']
     },
+    cmdclass={'build_ext': build_ext},
     ext_modules=extensions,
     license='BSD',
     description='Utility module for FreeNAS middleware',
