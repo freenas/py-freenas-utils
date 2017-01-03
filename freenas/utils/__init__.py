@@ -120,6 +120,13 @@ def yesno_to_bool(v):
     return False
 
 
+def bool_to_truefalse(v):
+    if v:
+        return 'true'
+
+    return 'false'
+
+
 def chunks(arr, size):
     for i in range(0, len(arr), size):
         yield arr[i:i+size]
