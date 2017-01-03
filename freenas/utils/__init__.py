@@ -127,6 +127,13 @@ def bool_to_truefalse(v):
     return 'false'
 
 
+def truefalse_to_bool(v):
+    if v == 'true':
+        return True
+
+    return False
+
+
 def chunks(arr, size):
     for i in range(0, len(arr), size):
         yield arr[i:i+size]
