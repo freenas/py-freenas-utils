@@ -319,7 +319,7 @@ def query(obj, *rules, **params):
     offset = params.pop('offset', None)
     limit = params.pop('limit', None)
     sort = params.pop('sort', None)
-    reverse = kwargs.pop('reverse', False)
+    reverse = params.pop('reverse', False)
     postprocess = params.pop('callback', None)
     select = params.pop('select', None)
     stream = params.pop('stream', False)
