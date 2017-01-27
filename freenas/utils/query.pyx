@@ -319,6 +319,7 @@ def query(obj, *rules, **params):
     offset = params.pop('offset', None)
     limit = params.pop('limit', None)
     sort = params.pop('sort', None)
+    reverse = kwargs.pop('reverse', False)
     postprocess = params.pop('callback', None)
     select = params.pop('select', None)
     stream = params.pop('stream', False)
@@ -369,6 +370,9 @@ def query(obj, *rules, **params):
 
     if limit:
         result = itertools.islice(result, 0, limit)
+
+    if reverse:
+        result = reversed(result)
 
     if postprocess:
         result = filter_and_map(postprocess, result)
