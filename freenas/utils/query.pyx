@@ -372,7 +372,7 @@ def query(obj, *rules, **params):
         result = itertools.islice(result, 0, limit)
 
     if reverse:
-        result = reversed(result)
+        result = reversed(list(result))
 
     if postprocess:
         result = filter_and_map(postprocess, result)
