@@ -1,4 +1,4 @@
-#+
+#
 # Copyright 2015 iXsystems, Inc.
 # All rights reserved
 #
@@ -282,18 +282,23 @@ def to_timedelta(time_val):
         return timedelta(days=(365 * num))
 
 
-def configure_logging(path, level):
+def configure_logging(ident_or_path, level, file=False):
+    from freenas.logd import LogdLogHandler
+
     logging.setLoggerClass(TraceLogger)
     logging.basicConfig(
         level=logging.getLevelName(level),
         format=LOGGING_FORMAT,
     )
 
-    if path:
-        handler = FaultTolerantLogHandler(path)
+    if file:
+        handler = FaultTolerantLogHandler(ident_or_path)
         handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
-        logging.root.removeHandler(logging.root.handlers[0])
-        logging.root.addHandler(handler)
+    else:
+        handler = LogdLogHandler(ident=ident_or_path)
+
+    logging.root.removeHandler(logging.root.handlers[0])
+    logging.root.addHandler(handler)
 
 
 def load_module_from_file(name, path):
