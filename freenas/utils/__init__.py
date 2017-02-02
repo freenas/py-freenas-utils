@@ -36,10 +36,10 @@ import random
 import string
 import binascii
 import hashlib
-import fnmatch
 import threading
 import traceback
 import contextlib
+from bsd import fnmatch
 from datetime import timedelta
 from string import Template
 from freenas.utils.trace_logger import TraceLogger
@@ -120,7 +120,7 @@ def first_or_default(f, iterable, default=None):
 def best_match(items, name, key=None, default=None):
     def try_match(item):
         pat = key(item) if key else item
-        return fnmatch.fnmatch(name, pat)
+        return fnmatch(name, pat)
 
     def get_length(item):
         i = key(item) if key else item
