@@ -39,11 +39,14 @@ import hashlib
 import threading
 import traceback
 import contextlib
-from bsd import fnmatch
 from datetime import timedelta
 from string import Template
 from freenas.utils.trace_logger import TraceLogger
 
+try:
+    from bsd import fnmatch
+except ImportError:
+    from fnmatch import fnmatch
 
 ESCAPE_SEQUENCE_RE = re.compile(r'''
     ( \\U........      # 8-digit hex escapes

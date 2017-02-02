@@ -30,7 +30,11 @@ import itertools
 import dateutil.parser
 from freenas.utils import list_startswith
 from six import string_types
-from bsd import fnmatch
+
+try:
+    from bsd import fnmatch
+except ImportError:
+    from fnmatch import fnmatch
 
 
 def op_in(x, y):
