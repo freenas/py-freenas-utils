@@ -30,6 +30,7 @@ import itertools
 import dateutil.parser
 from freenas.utils import list_startswith
 from six import string_types
+from bsd import fnmatch
 
 
 def op_in(x, y):
@@ -57,7 +58,8 @@ operators_table = {
     'in': op_in,
     'nin': op_nin,
     'contains': lambda x, y: y in x,
-    'ncontains': lambda x, y: y not in x
+    'ncontains': lambda x, y: y not in x,
+    'match': lambda x, y: fnmatch(y, x)
 }
 
 
