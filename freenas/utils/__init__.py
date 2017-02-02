@@ -112,10 +112,8 @@ COUNTRY_CODES = {
 
 
 def first_or_default(f, iterable, default=None):
-    i = list(filter(f, iterable))
-    if i:
-        return i[0]
-
+    for i in filter(f, iterable):
+        return i
     return default
 
 
