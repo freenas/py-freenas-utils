@@ -340,21 +340,22 @@ def xsendmsg(sock, buffer, ancdata=None):
 
 def xrecvmsg(sock, length, anclength=None):
     done = 0
-    message = b''
+    message = bytearray(length)
+    view = memoryview(message)
     ancdata = []
 
     while done < length:
         try:
-            buf, anc, _, _ = sock.recvmsg(length - done, anclength or 0)
+            nbytes, anc, _, _ = sock.recvmsg_into([view], anclength or 0)
         except InterruptedError:
             continue
 
-        if buf == b'':
-            return message, ancdata
+        if nbytes == 0:
+            return message[:done], ancdata
 
-        done += len(buf)
-        message += buf
+        done += nbytes
         ancdata += anc
+        view = view[:nbytes]
 
     return message, ancdata
 
