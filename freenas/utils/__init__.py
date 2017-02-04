@@ -351,11 +351,11 @@ def xrecvmsg(sock, length, anclength=None):
             continue
 
         if nbytes == 0:
-            return message[:done], ancdata
+            return message[done:], ancdata
 
         done += nbytes
         ancdata += anc
-        view = view[:nbytes]
+        view = view[nbytes:]
 
     return message, ancdata
 
