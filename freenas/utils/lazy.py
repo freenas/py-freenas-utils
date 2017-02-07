@@ -27,21 +27,31 @@
 
 
 class LazyValue(object):
-    def __init__(self, generator):
+    def __init__(self, generator, *args, **kwargs):
         self.generator = generator
+        self.args = args
+        self.kwargs = kwargs
         self.evaluated = False
         self.value = None
 
     def __call__(self):
         if not self.evaluated:
-            self.value = self.generator()
+            try:
+                self.value = self.generator(*self.args, **self.kwargs)
+            except:
+                pass
+
             self.evaluated = True
 
         return self.value
 
     def __getstate__(self):
         if not self.evaluated:
-            self.value = self.generator()
+            try:
+                self.value = self.generator(*self.args, **self.kwargs)
+            except:
+                pass
+
             self.evaluated = True
 
         return self.value
