@@ -46,6 +46,12 @@ class LazyValue(object):
 
         return self.value
 
+    def __copy__(self):
+        return self
+
+    def __deepcopy__(self, memodict):
+        return self
+
 
 def unlazy(value):
     if type(value) is LazyValue:
