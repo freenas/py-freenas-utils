@@ -67,11 +67,6 @@ operators_table = {
 }
 
 
-conversions_table = {
-    'timestamp': lambda v: dateutil.parser.parse(v)
-}
-
-
 def eval_logic_and(item, lst):
     for i in lst:
         if not eval_tuple(item, i):
@@ -103,10 +98,6 @@ def eval_logic_operator(item, t):
 
 def eval_field_operator(item, t):
     left, op, right = t
-
-    if len(t) == 4:
-        right = conversions_table[t[3]](right)
-
     return operators_table[op](get(item, left), right)
 
 
