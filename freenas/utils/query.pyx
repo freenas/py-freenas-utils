@@ -27,8 +27,8 @@
 
 import re
 import itertools
-import dateutil.parser
 from freenas.utils import list_startswith
+from freenas.utils.lazy import unlazy
 from six import string_types
 
 try:
@@ -178,7 +178,7 @@ def partition(s):
 def get(obj, path, default=None):
     if not isinstance(path, string_types):
         try:
-            return obj[path]
+            return unlazy(obj[path])
         except (KeyError, IndexError):
             return default
 
@@ -198,7 +198,7 @@ def get(obj, path, default=None):
 
         return default
 
-    return ptr
+    return unlazy(ptr)
 
 
 def set(obj, path, value):
