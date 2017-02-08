@@ -319,6 +319,7 @@ def query(obj, *rules, **params):
     reverse = params.pop('reverse', False)
     postprocess = params.pop('callback', None)
     select = params.pop('select', None)
+    exclude = params.pop('exclude', None)
     stream = params.pop('stream', False)
     result = iter(obj)
 
@@ -330,6 +331,22 @@ def query(obj, *rules, **params):
     if rules:
         result = search(result)
 
+    if exclude:
+        def exclude_fn(fn, obj):
+            obj = fn(obj) if fn else obj
+
+            if isinstance(exclude, (list, tuple)):
+                for i in exclude:
+                    delete(obj, i)
+
+            if isinstance(exclude, str):
+                delete(obj, exclude)
+
+            return obj
+
+        before_exclude = postprocess
+        postprocess = lambda o: exclude_fn(before_exclude, o)
+
     if select:
         def select_fn(fn, obj):
             obj = fn(obj) if fn else obj
@@ -340,8 +357,8 @@ def query(obj, *rules, **params):
             if isinstance(select, str):
                 return get(obj, select)
 
-        old = postprocess
-        postprocess = lambda o: select_fn(old, o)
+        before_select = postprocess
+        postprocess = lambda o: select_fn(before_select, o)
 
     if sort:
         def sort_transform(result, key):
