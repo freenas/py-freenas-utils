@@ -262,9 +262,10 @@ def set(obj, path, value):
 
 
 def delete(obj, path):
+    ptr = obj
+    left = path
     if isinstance(path, string_types):
         right = path
-        ptr = obj
         while right:
             left, right = partition(right)
             if not right:
@@ -272,19 +273,22 @@ def delete(obj, path):
 
             if isinstance(ptr, dict):
                 if left in ptr:
-                    ptr = ptr.get(left)
+                    ptr = unlazy(ptr.get(left))
                     continue
 
             if isinstance(ptr, (list, tuple)):
                 left = int(left)
                 if left < len(ptr):
-                    ptr = ptr[left]
+                    ptr = unlazy(ptr[left])
                     continue
 
             raise ValueError('Enclosing object {0} doesn\'t exist'.format(left))
-        del ptr[left]
-    else:
-        del obj[path]
+
+        if isinstance(ptr, dict):
+            del ptr[left]
+            return
+
+    del obj[int(left)]
 
 
 def contains(obj, path):
