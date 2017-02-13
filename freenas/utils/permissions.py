@@ -116,13 +116,14 @@ def int_to_string(value):
     result = ''
     for i in range(0, 9):
         if value & (1 << i):
-            if not i % 3:
+            p = i % 3
+            if p == 0:
                 result += 'x'
                 continue
-            if not i % 2:
-                result += 'r'
+            if p == 1:
+                result += 'w'
                 continue
-            result += 'w'
+            result += 'r'
         else:
             result += '-'
 
