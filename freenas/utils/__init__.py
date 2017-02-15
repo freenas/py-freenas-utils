@@ -327,11 +327,12 @@ def load_module_from_file(name, path):
     return loader.load_module()
 
 
-def xsendmsg(sock, buffer, ancdata=None):
+def xsendmsg(sock, buffer, ancdata=None, bufsize=65536):
     done = 0
+    view = memoryview(buffer)
     while done < len(buffer):
         try:
-            done += sock.sendmsg([buffer[done:]], ancdata or [])
+            done += sock.sendmsg([view[done:done+bufsize]], ancdata or [])
         except InterruptedError:
             continue
 
