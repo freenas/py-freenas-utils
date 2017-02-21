@@ -317,7 +317,7 @@ def delete(obj, path):
 
     try:
         del obj[int(left)]
-    except TypeError:
+    except (TypeError, ValueError):
         delattr(obj, str(left))
 
 
