@@ -196,6 +196,12 @@ def get(obj, path, default=None):
             ptr = unlazy(ptr[left]) if left < len(ptr) else None
             continue
 
+        try:
+            ptr = unlazy(getattr(ptr, str(left)))
+            continue
+        except AttributeError:
+            pass
+
         return default
 
     return unlazy(ptr)
@@ -240,6 +246,18 @@ def set(obj, path, value):
                 ptr = ptr[left]
                 continue
 
+            ll, _ = partition(right)
+            try:
+                if ll.isdigit():
+                    setattr(ptr, str(left), [])
+                else:
+                    setattr(ptr, str(left), {})
+
+                ptr = getattr(ptr, str(left))
+                continue
+            except AttributeError:
+                pass
+
             raise ValueError('Cannot set unsupported object type {0}'.format(type(ptr)))
 
         if isinstance(ptr, dict):
@@ -282,13 +300,22 @@ def delete(obj, path):
                     ptr = unlazy(ptr[left])
                     continue
 
+            try:
+                ptr = unlazy(getattr(ptr, str(left)))
+                continue
+            except AttributeError:
+                pass
+
             raise ValueError('Enclosing object {0} doesn\'t exist'.format(left))
 
         if isinstance(ptr, dict):
             del ptr[left]
             return
 
-    del obj[int(left)]
+    try:
+        del obj[int(left)]
+    except TypeError:
+        delattr(obj, str(left))
 
 
 def contains(obj, path):
@@ -309,6 +336,12 @@ def contains(obj, path):
                 ptr = ptr[left]
                 continue
 
+            return False
+
+        try:
+            ptr = unlazy(getattr(ptr, str(left)))
+            continue
+        except AttributeError:
             return False
 
     return True
