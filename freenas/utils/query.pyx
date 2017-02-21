@@ -276,7 +276,10 @@ def set(obj, path, value):
                 ptr.append(value)
 
         else:
-            raise ValueError('Cannot set unsupported object type {0}'.format(type(ptr)))
+            try:
+                setattr(ptr, str(left), value)
+            except AttributeError:
+                raise ValueError('Cannot set unsupported object type {0}'.format(type(ptr)))
 
 
 def delete(obj, path):
