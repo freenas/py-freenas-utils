@@ -42,6 +42,7 @@ import contextlib
 from datetime import timedelta
 from string import Template
 from freenas.utils.trace_logger import TraceLogger
+from freenas.dispatcher import Password
 
 try:
     from bsd import fnmatch
@@ -456,3 +457,10 @@ def human_readable_bytes(num, suffix=''):
         if abs(num) < 1024.0:
             return "%3.1f%s%s" % (num, unit, suffix)
         num /= 1024.0
+
+
+def unpassword(password):
+    if isinstance(password, Password):
+        return password.secret
+
+    return password
