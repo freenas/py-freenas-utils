@@ -188,7 +188,7 @@ def get(obj, path, default=None):
         left, right = partition(right)
 
         if isinstance(ptr, dict):
-            ptr = unlazy(ptr.get(left, default))
+            ptr = unlazy(ptr.get(left))
             continue
 
         if isinstance(ptr, (list, tuple)):
